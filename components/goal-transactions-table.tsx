@@ -20,7 +20,7 @@ const columns: ColumnDef<GoalTransaction>[] = [
     accessorKey: 'description',
     header: 'Description',
     cell: ({ row }) => (
-      <div className="font-medium text-slate-900">
+      <div className="font-medium text-slate-100">
         {row.getValue('description')}
       </div>
     ),
@@ -29,7 +29,7 @@ const columns: ColumnDef<GoalTransaction>[] = [
     accessorKey: 'transactedOn',
     header: 'Date',
     cell: ({ row }) => (
-      <span className="text-sm text-slate-700">
+      <span className="text-sm text-slate-300">
         {formatLongDate(row.getValue('transactedOn'))}
       </span>
     ),
@@ -43,7 +43,7 @@ const columns: ColumnDef<GoalTransaction>[] = [
         <span
           className={cn(
             'text-sm font-semibold',
-            amount >= 0 ? 'text-emerald-700' : 'text-rose-700',
+            amount >= 0 ? 'text-emerald-300' : 'text-rose-300',
           )}
         >
           {formatSignedCurrencyFromCents(amount)}
@@ -55,7 +55,7 @@ const columns: ColumnDef<GoalTransaction>[] = [
     accessorKey: 'createdBy',
     header: 'By',
     cell: ({ row }) => (
-      <span className="text-sm text-slate-700">
+      <span className="text-sm text-slate-300">
         {row.getValue('createdBy') || '—'}
       </span>
     ),
@@ -84,29 +84,29 @@ export function GoalTransactionsTable({
   })
 
   return (
-    <div className="rounded-3xl border border-[#e7d8c4] bg-[#f6e9d7] p-6 text-slate-900 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.6)]">
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-100 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.6)]">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
             Transactions
           </p>
           <h2 className="text-2xl font-semibold">Goal ledger</h2>
         </div>
-        <div className="rounded-full bg-slate-900/90 px-4 py-2 text-xs uppercase tracking-[0.3em] text-slate-100">
+        <div className="rounded-full bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.3em] text-slate-100">
           {transactions.length} entries
         </div>
       </div>
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/70">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-white/90">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60">
+        <table className="w-full text-left text-sm text-slate-200">
+          <thead className="border-b border-white/10 bg-slate-900/80">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-slate-200">
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const isSorted = header.column.getIsSorted()
                   return (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500"
+                      className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"
                     >
                       {header.isPlaceholder ? null : (
                         <button
@@ -125,7 +125,7 @@ export function GoalTransactionsTable({
                               <ArrowDown className="h-3 w-3" />
                             )
                           ) : (
-                            <ArrowUpDown className="h-3 w-3 text-slate-400" />
+                            <ArrowUpDown className="h-3 w-3 text-slate-500" />
                           )}
                         </button>
                       )}
@@ -140,7 +140,7 @@ export function GoalTransactionsTable({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b border-slate-200/80 last:border-b-0"
+                  className="border-b border-white/10 last:border-b-0"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3">
@@ -156,7 +156,7 @@ export function GoalTransactionsTable({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-6 text-center text-sm text-slate-500"
+                  className="px-4 py-6 text-center text-sm text-slate-400"
                 >
                   No transactions yet. Add your first entry to start tracking.
                 </td>
