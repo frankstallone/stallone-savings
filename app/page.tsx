@@ -1,4 +1,5 @@
 import { GoalCard } from '@/components/goal-card'
+import { GoalEmptyState } from '@/components/goal-empty-state'
 import { getGoals } from '@/lib/data/goals'
 import { formatCurrencyFromCents } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -49,37 +50,37 @@ export default async function HomePage() {
 
           <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {goals.length ? (
-              goals.map((goal, index) => (
-                <GoalCard key={goal.id} goal={goal} index={index} />
-              ))
+              <>
+                {goals.map((goal, index) => (
+                  <GoalCard key={goal.id} goal={goal} index={index} />
+                ))}
+                <Link
+                  href="/goals/new"
+                  className={cn(
+                    'group h-full w-full rounded-3xl border border-dashed border-white/15 bg-white/5 p-6 text-left text-slate-200 transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+                  )}
+                >
+                  <div className="flex h-full flex-col items-start justify-between gap-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5">
+                      <PlusIcon className="h-5 w-5 text-slate-200" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400">
+                        New goal
+                      </p>
+                      <p className="text-lg font-semibold text-white">
+                        Add a new bucket
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        Track a fresh savings target.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </>
             ) : (
-              <div className="col-span-full rounded-3xl border border-white/10 bg-white/5 p-8 text-center text-sm text-slate-400">
-                No goals yet. Add your first bucket to start tracking.
-              </div>
+              <GoalEmptyState />
             )}
-            <Link
-              href="/goals/new"
-              className={cn(
-                'group h-full w-full rounded-3xl border border-dashed border-white/15 bg-white/5 p-6 text-left text-slate-200 transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
-              )}
-            >
-              <div className="flex h-full flex-col items-start justify-between gap-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5">
-                  <PlusIcon className="h-5 w-5 text-slate-200" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400">
-                    New goal
-                  </p>
-                  <p className="text-lg font-semibold text-white">
-                    Add a new bucket
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Track a fresh savings target.
-                  </p>
-                </div>
-              </div>
-            </Link>
           </section>
         </div>
       </div>
