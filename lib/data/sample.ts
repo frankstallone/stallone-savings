@@ -28,7 +28,7 @@ export const sampleGoals: Goal[] = [
     name: 'Education Fund',
     description: 'Tuition and living expenses for Student.',
     coverImageUrl:
-      'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop',
     champions: ['Owner Two', 'Owner One'],
     targetAmountCents: 180_000_00,
   },
