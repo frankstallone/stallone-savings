@@ -4,7 +4,6 @@ import { groupTotalsByGoal } from "@/lib/ledger"
 import type { GoalSummary, GoalTransaction } from "@/lib/types"
 import {
   sampleGoalSummaries,
-  sampleGoals,
   sampleTransactions,
 } from "@/lib/data/sample"
 

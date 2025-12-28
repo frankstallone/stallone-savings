@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -45,11 +46,13 @@ export function GoalCard({ goal, index }: GoalCardProps) {
         </div>
         <div className="relative">
           {goal.coverImageUrl ? (
-            <div className="h-32 w-full overflow-hidden">
-              <img
+            <div className="relative h-32 w-full overflow-hidden">
+              <Image
                 src={goal.coverImageUrl}
                 alt={`${goal.name} cover`}
-                className="h-full w-full object-cover opacity-60 transition duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover opacity-60 transition duration-500 group-hover:scale-105"
               />
             </div>
           ) : (
