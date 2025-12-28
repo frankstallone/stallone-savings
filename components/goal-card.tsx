@@ -91,15 +91,10 @@ export function GoalCard({ goal, index }: GoalCardProps) {
               Shared Goal
             </Badge>
           )}
-          {goal.coverImageAttributionName && goal.coverImageAttributionUrl ? (
-            <a
-              href={goal.coverImageAttributionUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="pointer-events-auto text-xs text-slate-400 underline underline-offset-4"
-            >
+          {goal.coverImageAttributionName ? (
+            <span className="text-xs text-slate-400">
               Photo by {goal.coverImageAttributionName}
-            </a>
+            </span>
           ) : null}
           <Badge variant="secondary" className="ml-auto bg-white/10 text-white">
             View
