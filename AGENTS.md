@@ -41,5 +41,5 @@
 
 ## Configuration & Deployment Notes
 
-- `.env.local` for secrets. Required: `DATABASE_URL`, `UNSPLASH_ACCESS_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+- `.env.local` for secrets. Required: `DATABASE_URL`, `UNSPLASH_ACCESS_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Optional: `ALLOWED_EMAILS=you@example.com,partner@example.com` to restrict access.
 - Vercel deploys from this repo; keep env vars synced across dev/preview/prod.

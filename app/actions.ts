@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { getServerSession } from '@/lib/auth-session'
+import { getAuthorizedSession } from '@/lib/auth-session'
 import { getSql } from '@/lib/db'
 import { normalizeGoalPayload, slugifyGoalName } from '@/lib/goals'
 
@@ -16,7 +16,7 @@ export async function addGoalAction(
   prevState: AddGoalState,
   formData: FormData,
 ): Promise<AddGoalState> {
-  const session = await getServerSession()
+  const session = await getAuthorizedSession()
   if (!session) {
     return { status: 'error', message: 'Sign in required.' }
   }

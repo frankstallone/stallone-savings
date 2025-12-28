@@ -26,6 +26,12 @@ Create `.env.local` with:
 ```bash
 DATABASE_URL=postgres://...
 UNSPLASH_ACCESS_KEY=your_key
+BETTER_AUTH_SECRET=your_32+_char_secret
+BETTER_AUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+# Optional: lock the app to specific accounts
+ALLOWED_EMAILS=you@example.com,partner@example.com
 ```
 
 Apply `db/schema.sql` to initialize the database.

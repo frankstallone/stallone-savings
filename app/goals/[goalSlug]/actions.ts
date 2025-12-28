@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { getServerSession } from '@/lib/auth-session'
+import { getAuthorizedSession } from '@/lib/auth-session'
 import { getSql } from '@/lib/db'
 import { normalizeTransactionPayload } from '@/lib/transactions'
 
@@ -22,7 +22,7 @@ export async function addTransactionAction(
   prevState: AddTransactionState,
   formData: FormData,
 ): Promise<AddTransactionState> {
-  const session = await getServerSession()
+  const session = await getAuthorizedSession()
   if (!session) {
     return { status: 'error', message: 'Sign in required.' }
   }
@@ -96,7 +96,7 @@ export async function deleteGoalAction(
   void prevState
   void formData
 
-  const session = await getServerSession()
+  const session = await getAuthorizedSession()
   if (!session) {
     return { status: 'error', message: 'Sign in required.' }
   }

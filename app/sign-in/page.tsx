@@ -4,11 +4,16 @@ import { GoogleSignInButton } from '@/components/auth-buttons'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { getServerSession } from '@/lib/auth-session'
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string }
+}) {
   const session = await getServerSession()
   if (session) {
     redirect('/')
   }
+  const isUnauthorized = searchParams?.error === 'unauthorized'
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -29,6 +34,11 @@ export default async function SignInPage() {
               </p>
             </CardHeader>
             <CardContent>
+              {isUnauthorized ? (
+                <p className="mb-4 text-sm text-rose-200">
+                  This Google account is not authorized to access this app.
+                </p>
+              ) : null}
               <GoogleSignInButton className="w-full" />
             </CardContent>
           </Card>
