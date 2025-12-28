@@ -18,11 +18,11 @@ describe('normalizeGoalPayload', () => {
       targetAmount: '1000',
       coverImageUrl: 'https://example.com/cover.jpg',
       coverImageSource: 'unsplash',
-      coverImageAttributionName: 'Student Photographer',
+      coverImageAttributionName: 'Sample Photographer',
       coverImageAttributionUrl:
         'https://unsplash.com/@ava?utm_source=f4_goal_tracker&utm_medium=referral',
       coverImageId: 'photo-ava',
-      champions: 'Frank, Owner One',
+      champions: 'Owner One, Owner Two',
     })
 
     expect(result.data).toEqual({
@@ -31,11 +31,11 @@ describe('normalizeGoalPayload', () => {
       targetAmountCents: 100000,
       coverImageUrl: 'https://example.com/cover.jpg',
       coverImageSource: 'unsplash',
-      coverImageAttributionName: 'Student Photographer',
+      coverImageAttributionName: 'Sample Photographer',
       coverImageAttributionUrl:
         'https://unsplash.com/@ava?utm_source=f4_goal_tracker&utm_medium=referral',
       coverImageId: 'photo-ava',
-      champions: ['Frank', 'Owner One'],
+      champions: ['Owner One', 'Owner Two'],
     })
   })
 

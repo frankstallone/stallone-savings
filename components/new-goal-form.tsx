@@ -44,8 +44,8 @@ export function NewGoalForm() {
   const router = useRouter()
   const championAnchor = useComboboxAnchor()
   const [championOptions, setChampionOptions] = React.useState<string[]>([
-    'Owner Two',
     'Owner One',
+    'Owner Two',
   ])
   const [champions, setChampions] = React.useState<string[]>([])
   const [championQuery, setChampionQuery] = React.useState('')
@@ -290,7 +290,7 @@ export function NewGoalForm() {
           <Textarea
             id="description"
             name="description"
-            placeholder="Tuition and living expenses for Student."
+            placeholder="Tuition and living expenses."
             className="min-h-[88px] bg-white/5"
           />
         </FieldContent>

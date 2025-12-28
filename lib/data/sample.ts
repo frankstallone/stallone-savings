@@ -6,7 +6,7 @@ export const sampleGoals: Goal[] = [
     id: 'goal-retirement',
     slug: 'retirement-fund',
     name: 'Retirement Fund',
-    description: 'Long-range retirement runway for Owner One.',
+    description: 'Long-range retirement runway.',
     coverImageUrl:
       'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop',
     coverImageSource: 'unsplash',
@@ -36,7 +36,7 @@ export const sampleGoals: Goal[] = [
     id: 'goal-education-fund',
     slug: 'education-fund',
     name: 'Education Fund',
-    description: 'Tuition and living expenses for Student.',
+    description: 'Tuition and living expenses.',
     coverImageUrl:
       'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop',
     coverImageSource: 'unsplash',
@@ -44,14 +44,14 @@ export const sampleGoals: Goal[] = [
     coverImageAttributionUrl:
       'https://unsplash.com/@brookecagle?utm_source=f4_goal_tracker&utm_medium=referral',
     coverImageId: 'photo-1522202176988-66273c2fd55f',
-    champions: ['Owner Two', 'Owner One'],
+    champions: ['Owner One', 'Owner Two'],
     targetAmountCents: 180_000_00,
   },
   {
     id: 'goal-mortgage',
-    slug: 'mortgage-backup',
-    name: 'Mortgage Backup',
-    description: 'Emergency reserve for the mortgage and escrow.',
+    slug: 'housing-buffer',
+    name: 'Housing Buffer',
+    description: 'Emergency reserve for housing costs.',
     coverImageUrl:
       'https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1600&auto=format&fit=crop',
     coverImageSource: 'unsplash',
@@ -104,7 +104,7 @@ export const sampleGoals: Goal[] = [
     coverImageAttributionUrl:
       'https://unsplash.com/@rarchitecture_melbourne?utm_source=f4_goal_tracker&utm_medium=referral',
     coverImageId: 'photo-1481277542470-605612bd2d61',
-    champions: ['Owner Two', 'Owner One'],
+    champions: ['Owner One', 'Owner Two'],
     targetAmountCents: 75_000_00,
   },
 ]
