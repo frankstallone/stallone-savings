@@ -14,6 +14,7 @@ import {
   formatSignedCurrencyFromCents,
 } from '@/lib/format'
 import { splitDepositsWithdrawals, sumAmounts } from '@/lib/ledger'
+import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
 
 interface GoalDetailPageProps {
@@ -76,13 +77,13 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
 
               <div className="flex flex-wrap items-center gap-3">
                 {goal.champions.length ? (
-                  goal.champions.map((champion: string) => (
+                  goal.champions.map((champion) => (
                     <Badge
-                      key={champion}
+                      key={champion.id}
                       variant="secondary"
                       className="bg-white/10 text-white"
                     >
-                      {champion}
+                      {getUserLabel(champion)}
                     </Badge>
                   ))
                 ) : (

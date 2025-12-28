@@ -1,11 +1,11 @@
 import { cache } from 'react'
 import { getSql } from '@/lib/db'
 import { groupTotalsByGoal } from '@/lib/ledger'
-import type { GoalSummary, GoalTransaction } from '@/lib/types'
+import type { Champion, GoalSummary, GoalTransaction } from '@/lib/types'
 import { sampleGoalSummaries, sampleTransactions } from '@/lib/data/sample'
 
-type GoalRow = GoalSummary & {
-  champions: string[] | null
+type GoalRow = Omit<GoalSummary, 'champions' | 'balanceCents'> & {
+  champions: Champion[] | null
   balance_cents: number | null
 }
 
@@ -24,12 +24,25 @@ export const getGoals = cache(async () => {
       g.cover_image_attribution_name AS "coverImageAttributionName",
       g.cover_image_attribution_url AS "coverImageAttributionUrl",
       g.cover_image_id AS "coverImageId",
-      g.champions,
       g.target_amount_cents AS "targetAmountCents",
-      COALESCE(SUM(t.amount_cents), 0)::int AS balance_cents
+      (
+        SELECT COALESCE(SUM(t.amount_cents), 0)::int
+        FROM goal_transactions t
+        WHERE t.goal_id = g.id
+      ) AS balance_cents,
+      (
+        SELECT COALESCE(
+          jsonb_agg(
+            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
+            ORDER BY u.name NULLS LAST, u.email
+          ) FILTER (WHERE u.id IS NOT NULL),
+          '[]'::jsonb
+        )
+        FROM goal_champions gc
+        JOIN "user" u ON u.id = gc.user_id
+        WHERE gc.goal_id = g.id
+      ) AS champions
     FROM goals g
-    LEFT JOIN goal_transactions t ON t.goal_id = g.id
-    GROUP BY g.id
     ORDER BY g.created_at DESC
   `) as GoalRow[]
 
@@ -43,7 +56,7 @@ export const getGoals = cache(async () => {
     coverImageAttributionName: row.coverImageAttributionName ?? null,
     coverImageAttributionUrl: row.coverImageAttributionUrl ?? null,
     coverImageId: row.coverImageId ?? null,
-    champions: row.champions ?? [],
+    champions: Array.isArray(row.champions) ? row.champions : [],
     targetAmountCents: row.targetAmountCents ?? null,
     balanceCents: Number(row.balance_cents ?? 0),
   }))
@@ -66,13 +79,26 @@ export const getGoalBySlug = cache(async (slug: string) => {
       g.cover_image_attribution_name AS "coverImageAttributionName",
       g.cover_image_attribution_url AS "coverImageAttributionUrl",
       g.cover_image_id AS "coverImageId",
-      g.champions,
       g.target_amount_cents AS "targetAmountCents",
-      COALESCE(SUM(t.amount_cents), 0)::int AS balance_cents
+      (
+        SELECT COALESCE(SUM(t.amount_cents), 0)::int
+        FROM goal_transactions t
+        WHERE t.goal_id = g.id
+      ) AS balance_cents,
+      (
+        SELECT COALESCE(
+          jsonb_agg(
+            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
+            ORDER BY u.name NULLS LAST, u.email
+          ) FILTER (WHERE u.id IS NOT NULL),
+          '[]'::jsonb
+        )
+        FROM goal_champions gc
+        JOIN "user" u ON u.id = gc.user_id
+        WHERE gc.goal_id = g.id
+      ) AS champions
     FROM goals g
-    LEFT JOIN goal_transactions t ON t.goal_id = g.id
     WHERE g.slug = ${slug}
-    GROUP BY g.id
     LIMIT 1
   `) as GoalRow[]
 
@@ -89,7 +115,7 @@ export const getGoalBySlug = cache(async (slug: string) => {
     coverImageAttributionName: row.coverImageAttributionName ?? null,
     coverImageAttributionUrl: row.coverImageAttributionUrl ?? null,
     coverImageId: row.coverImageId ?? null,
-    champions: row.champions ?? [],
+    champions: Array.isArray(row.champions) ? row.champions : [],
     targetAmountCents: row.targetAmountCents ?? null,
     balanceCents: Number(row.balance_cents ?? 0),
   }

@@ -1,3 +1,11 @@
+export type UserSummary = {
+  id: string
+  name: string | null
+  email: string | null
+}
+
+export type Champion = UserSummary
+
 export type Goal = {
   id: string
   slug: string
@@ -8,7 +16,7 @@ export type Goal = {
   coverImageAttributionName: string | null
   coverImageAttributionUrl: string | null
   coverImageId: string | null
-  champions: string[]
+  champions: Champion[]
   targetAmountCents: number | null
 }
 

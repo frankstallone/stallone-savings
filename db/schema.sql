@@ -10,10 +10,16 @@ CREATE TABLE IF NOT EXISTS goals (
   cover_image_attribution_name text,
   cover_image_attribution_url text,
   cover_image_id text,
-  champions text[] DEFAULT '{}'::text[],
   target_amount_cents integer,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS goal_champions (
+  goal_id uuid NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+  user_id text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now(),
+  PRIMARY KEY (goal_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS goal_transactions (
@@ -28,3 +34,6 @@ CREATE TABLE IF NOT EXISTS goal_transactions (
 
 CREATE INDEX IF NOT EXISTS goal_transactions_goal_id_idx
   ON goal_transactions(goal_id);
+
+CREATE INDEX IF NOT EXISTS goal_champions_goal_id_idx
+  ON goal_champions(goal_id);

@@ -52,10 +52,14 @@ export function normalizeGoalPayload(
   }
 
   const champions = payload.champions
-    ? payload.champions
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean)
+    ? Array.from(
+        new Set(
+          payload.champions
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean),
+        ),
+      )
     : []
 
   return {

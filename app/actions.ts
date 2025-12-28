@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { getAllowedEmails } from '@/lib/access-control'
 import { getAuthorizedSession } from '@/lib/auth-session'
 import { getSql } from '@/lib/db'
 import { normalizeGoalPayload, slugifyGoalName } from '@/lib/goals'
@@ -71,7 +72,7 @@ export async function addGoalAction(
     slug = `${baseSlug}-${maxSuffix + 1}`
   }
 
-  await sql`
+  const goalRows = (await sql`
     INSERT INTO goals (
       slug,
       name,
@@ -81,7 +82,6 @@ export async function addGoalAction(
       cover_image_attribution_name,
       cover_image_attribution_url,
       cover_image_id,
-      champions,
       target_amount_cents
     )
     VALUES (
@@ -93,10 +93,33 @@ export async function addGoalAction(
       ${data.coverImageAttributionName},
       ${data.coverImageAttributionUrl},
       ${data.coverImageId},
-      ${data.champions},
       ${data.targetAmountCents}
     )
-  `
+    RETURNING id
+  `) as { id: string }[]
+
+  const goalId = goalRows[0]?.id
+  if (goalId && data.champions.length) {
+    const allowedEmails = getAllowedEmails()
+    if (allowedEmails.length) {
+      await sql`
+        INSERT INTO goal_champions (goal_id, user_id)
+        SELECT ${goalId}::uuid, u.id
+        FROM "user" u
+        WHERE u.id = ANY(${data.champions}::text[])
+          AND u.email = ANY(${allowedEmails}::text[])
+        ON CONFLICT DO NOTHING
+      `
+    } else {
+      await sql`
+        INSERT INTO goal_champions (goal_id, user_id)
+        SELECT ${goalId}::uuid, u.id
+        FROM "user" u
+        WHERE u.id = ANY(${data.champions}::text[])
+        ON CONFLICT DO NOTHING
+      `
+    }
+  }
 
   revalidatePath('/')
 

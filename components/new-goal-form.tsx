@@ -33,21 +33,27 @@ import {
   useComboboxAnchor,
 } from '@/components/ui/combobox'
 import { Textarea } from '@/components/ui/textarea'
+import type { UserSummary } from '@/lib/types'
 import { createDebouncer } from '@/lib/debounce'
 import { MIN_UNSPLASH_QUERY_LENGTH, shouldSearchUnsplash } from '@/lib/unsplash'
+import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 const initialState: AddGoalState = { status: 'idle' }
 
-export function NewGoalForm() {
+type NewGoalFormProps = {
+  championOptions: UserSummary[]
+  defaultChampionIds?: string[]
+}
+
+export function NewGoalForm({
+  championOptions,
+  defaultChampionIds = [],
+}: NewGoalFormProps) {
   const router = useRouter()
   const championAnchor = useComboboxAnchor()
-  const [championOptions, setChampionOptions] = React.useState<string[]>([
-    'Owner One',
-    'Owner Two',
-  ])
-  const [champions, setChampions] = React.useState<string[]>([])
+  const [champions, setChampions] = React.useState<string[]>(defaultChampionIds)
   const [championQuery, setChampionQuery] = React.useState('')
   const [state, formAction, pending] = React.useActionState(
     addGoalAction,
@@ -88,15 +94,17 @@ export function NewGoalForm() {
   )
   const debouncerRef = React.useRef(createDebouncer(400))
   const abortRef = React.useRef<AbortController | null>(null)
-  const trimmedChampionQuery = championQuery.trim()
-  const hasChampionQuery =
-    trimmedChampionQuery.length > 0 &&
-    !championOptions.some(
-      (option) => option.toLowerCase() === trimmedChampionQuery.toLowerCase(),
-    )
-  const championItems = hasChampionQuery
-    ? [...championOptions, trimmedChampionQuery]
-    : championOptions
+  const championItems = React.useMemo(
+    () => championOptions.map((option) => option.id),
+    [championOptions],
+  )
+  const championLabels = React.useMemo(
+    () =>
+      new Map(
+        championOptions.map((option) => [option.id, getUserLabel(option)]),
+      ),
+    [championOptions],
+  )
 
   const runSearch = React.useCallback(async (query: string) => {
     const normalized = query.trim()
@@ -222,17 +230,7 @@ export function NewGoalForm() {
   }
 
   const handleChampionsChange = (nextValues: string[] | null) => {
-    const next = nextValues ?? []
-    const newOptions = next.filter(
-      (value) =>
-        !championOptions.some(
-          (option) => option.toLowerCase() === value.toLowerCase(),
-        ),
-    )
-    if (newOptions.length) {
-      setChampionOptions((prev) => [...prev, ...newOptions])
-    }
-    setChampions(next)
+    setChampions(nextValues ?? [])
     setChampionQuery('')
   }
 
@@ -416,12 +414,19 @@ export function NewGoalForm() {
             items={championItems}
           >
             <ComboboxChips ref={championAnchor} aria-label="Champions">
-              {champions.map((champion) => (
-                <ComboboxChip key={champion}>{champion}</ComboboxChip>
+              {champions.map((championId) => (
+                <ComboboxChip key={championId}>
+                  {championLabels.get(championId) ?? 'Unknown'}
+                </ComboboxChip>
               ))}
               <ComboboxChipsInput
                 id="champions"
-                placeholder="Add champion..."
+                placeholder={
+                  championOptions.length
+                    ? 'Select champions...'
+                    : 'No champions available'
+                }
+                disabled={!championOptions.length}
               />
             </ComboboxChips>
             <ComboboxContent anchor={championAnchor}>
@@ -429,15 +434,13 @@ export function NewGoalForm() {
               <ComboboxList>
                 {(item) => (
                   <ComboboxItem key={item} value={item}>
-                    {hasChampionQuery && item === trimmedChampionQuery
-                      ? `Create “${item}”`
-                      : item}
+                    {championLabels.get(item) ?? 'Unknown'}
                   </ComboboxItem>
                 )}
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
-          <input type="hidden" name="champions" value={champions.join(', ')} />
+          <input type="hidden" name="champions" value={champions.join(',')} />
         </FieldContent>
       </Field>
 

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { formatCurrencyFromCents } from '@/lib/format'
 import type { GoalSummary } from '@/lib/types'
+import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
 
 const FALLBACK_GRADIENTS = [
@@ -75,11 +76,11 @@ export function GoalCard({ goal, index }: GoalCardProps) {
             {goal.champions.length ? (
               goal.champions.map((champion) => (
                 <Badge
-                  key={champion}
+                  key={champion.id}
                   variant="secondary"
                   className="bg-white/10 text-white"
                 >
-                  {champion}
+                  {getUserLabel(champion)}
                 </Badge>
               ))
             ) : (

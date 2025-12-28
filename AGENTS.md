@@ -4,7 +4,7 @@
 
 - `app/` is the Next.js App Router surface: `/` goals grid, `/goals/new` for creation, `/goals/[goalSlug]` for detail + ledger, and `app/api/unsplash/*` for search/download tracking.
 - `components/` holds app UI (goal cards, empty state, goal ledger table, new-goal form). `components/ui/` is shadcn/Base UI output.
-- `db/schema.sql` defines Neon/Postgres tables (`goals`, `goal_transactions`).
+- `db/schema.sql` defines Neon/Postgres tables (`goals`, `goal_transactions`, `goal_champions`).
 - `lib/` for utilities and data access: `lib/data/*`, `lib/ledger`, `lib/unsplash`.
 - Tests live in `lib/__tests__/` and `components/__tests__/`.
 

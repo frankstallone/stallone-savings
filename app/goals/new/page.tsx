@@ -4,10 +4,13 @@ import { SignOutButton } from '@/components/auth-buttons'
 import { NewGoalForm } from '@/components/new-goal-form'
 import { buttonVariants } from '@/components/ui/button'
 import { requireServerSession } from '@/lib/auth-session'
+import { getAllowedUsers } from '@/lib/users'
 import { cn } from '@/lib/utils'
 
 export default async function NewGoalPage() {
-  await requireServerSession()
+  const session = await requireServerSession()
+  const championOptions = await getAllowedUsers()
+  const defaultChampionIds = session?.user?.id ? [session.user.id] : []
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="relative overflow-hidden">
@@ -42,7 +45,10 @@ export default async function NewGoalPage() {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
-              <NewGoalForm />
+              <NewGoalForm
+                championOptions={championOptions}
+                defaultChampionIds={defaultChampionIds}
+              />
             </div>
           </section>
         </div>

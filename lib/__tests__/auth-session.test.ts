@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-import { getServerSession, isEmailAllowed } from '@/lib/auth-session'
+import { getServerSession } from '@/lib/auth-session'
+import { isEmailAllowed } from '@/lib/access-control'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 
