@@ -21,6 +21,17 @@ import {
   InputGroupText,
 } from '@/components/ui/input-group'
 import { Input } from '@/components/ui/input'
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from '@/components/ui/combobox'
 import { Textarea } from '@/components/ui/textarea'
 import { createDebouncer } from '@/lib/debounce'
 import { MIN_UNSPLASH_QUERY_LENGTH, shouldSearchUnsplash } from '@/lib/unsplash'
@@ -31,6 +42,13 @@ const initialState: AddGoalState = { status: 'idle' }
 
 export function NewGoalForm() {
   const router = useRouter()
+  const championAnchor = useComboboxAnchor()
+  const [championOptions, setChampionOptions] = React.useState<string[]>([
+    'Owner Two',
+    'Owner One',
+  ])
+  const [champions, setChampions] = React.useState<string[]>([])
+  const [championQuery, setChampionQuery] = React.useState('')
   const [state, formAction, pending] = React.useActionState(
     addGoalAction,
     initialState,
@@ -70,6 +88,15 @@ export function NewGoalForm() {
   )
   const debouncerRef = React.useRef(createDebouncer(400))
   const abortRef = React.useRef<AbortController | null>(null)
+  const trimmedChampionQuery = championQuery.trim()
+  const hasChampionQuery =
+    trimmedChampionQuery.length > 0 &&
+    !championOptions.some(
+      (option) => option.toLowerCase() === trimmedChampionQuery.toLowerCase(),
+    )
+  const championItems = hasChampionQuery
+    ? [...championOptions, trimmedChampionQuery]
+    : championOptions
 
   const runSearch = React.useCallback(async (query: string) => {
     const normalized = query.trim()
@@ -192,6 +219,21 @@ export function NewGoalForm() {
     setCoverImageAttributionName('')
     setCoverImageAttributionUrl('')
     setCoverImageId('')
+  }
+
+  const handleChampionsChange = (nextValues: string[] | null) => {
+    const next = nextValues ?? []
+    const newOptions = next.filter(
+      (value) =>
+        !championOptions.some(
+          (option) => option.toLowerCase() === value.toLowerCase(),
+        ),
+    )
+    if (newOptions.length) {
+      setChampionOptions((prev) => [...prev, ...newOptions])
+    }
+    setChampions(next)
+    setChampionQuery('')
   }
 
   return (
@@ -365,12 +407,39 @@ export function NewGoalForm() {
       <Field>
         <FieldLabel htmlFor="champions">Champions</FieldLabel>
         <FieldContent>
-          <Input
-            id="champions"
-            name="champions"
-            placeholder="Frank, Owner One"
-            className="bg-white/5"
-          />
+          <Combobox
+            selectionMode="multiple"
+            selectedValue={champions}
+            onSelectedValueChange={handleChampionsChange}
+            inputValue={championQuery}
+            onInputValueChange={setChampionQuery}
+            items={championItems}
+          >
+            <ComboboxChips ref={championAnchor} aria-label="Champions">
+              {champions.map((champion) => (
+                <ComboboxChip key={champion} value={champion}>
+                  {champion}
+                </ComboboxChip>
+              ))}
+              <ComboboxChipsInput
+                id="champions"
+                placeholder="Add champion..."
+              />
+            </ComboboxChips>
+            <ComboboxContent anchor={championAnchor}>
+              <ComboboxEmpty>No matches found.</ComboboxEmpty>
+              <ComboboxList>
+                {(item) => (
+                  <ComboboxItem key={item} value={item}>
+                    {hasChampionQuery && item === trimmedChampionQuery
+                      ? `Create “${item}”`
+                      : item}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+          <input type="hidden" name="champions" value={champions.join(', ')} />
         </FieldContent>
       </Field>
 
