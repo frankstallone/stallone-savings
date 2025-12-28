@@ -1,15 +1,15 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { GoalTransactionsTable } from "@/components/goal-transactions-table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { getGoalBySlug, getGoalTransactions } from "@/lib/data/goals"
 import {
   formatCurrencyFromCents,
   formatSignedCurrencyFromCents,
 } from "@/lib/format"
-import { splitInflowOutflow, sumAmounts } from "@/lib/ledger"
+import { splitDepositsWithdrawals, sumAmounts } from "@/lib/ledger"
 
 interface GoalDetailPageProps {
   params: Promise<{ goalSlug: string }>
@@ -25,7 +25,7 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const transactions = await getGoalTransactions(goal.id)
   const balanceFromTransactions = sumAmounts(transactions)
   const balance = transactions.length ? balanceFromTransactions : goal.balanceCents
-  const { inflow, outflow } = splitInflowOutflow(transactions)
+  const { deposits, withdrawals } = splitDepositsWithdrawals(transactions)
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -37,9 +37,7 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
             <Link href="/" className="text-sm text-slate-400 hover:text-white">
               ← Back to goals
             </Link>
-            <Button variant="secondary" className="bg-white/10 text-white">
-              Add transaction
-            </Button>
+            <AddTransactionDialog goalSlug={goal.slug} goalName={goal.name} />
           </div>
 
           <section className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
@@ -97,20 +95,20 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
             <div className="space-y-4">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  Inflow
+                  Deposits
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-emerald-300">
-                  {formatSignedCurrencyFromCents(inflow)}
+                  {formatSignedCurrencyFromCents(deposits)}
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  Outflow
+                  Withdrawals
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-rose-300">
-                  {outflow > 0
-                    ? `-${formatSignedCurrencyFromCents(outflow)}`
-                    : formatSignedCurrencyFromCents(outflow)}
+                  {withdrawals > 0
+                    ? `-${formatSignedCurrencyFromCents(withdrawals)}`
+                    : formatSignedCurrencyFromCents(withdrawals)}
                 </p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">

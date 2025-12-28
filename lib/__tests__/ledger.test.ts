@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { groupTotalsByGoal, splitInflowOutflow, sumAmounts } from "@/lib/ledger"
+import {
+  groupTotalsByGoal,
+  splitDepositsWithdrawals,
+  sumAmounts,
+} from "@/lib/ledger"
 
 describe("ledger utilities", () => {
   it("sums amounts across transactions", () => {
@@ -26,13 +30,13 @@ describe("ledger utilities", () => {
     })
   })
 
-  it("splits inflow and outflow", () => {
-    const totals = splitInflowOutflow([
+  it("splits deposits and withdrawals", () => {
+    const totals = splitDepositsWithdrawals([
       { amountCents: 1500 },
       { amountCents: -250 },
       { amountCents: 100 },
     ])
 
-    expect(totals).toEqual({ inflow: 1600, outflow: 250 })
+    expect(totals).toEqual({ deposits: 1600, withdrawals: 250 })
   })
 })

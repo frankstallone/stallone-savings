@@ -17,16 +17,16 @@ export function groupTotalsByGoal(records: GoalAmountRecord[]) {
   }, {})
 }
 
-export function splitInflowOutflow(records: AmountRecord[]) {
+export function splitDepositsWithdrawals(records: AmountRecord[]) {
   return records.reduce(
     (totals, record) => {
       if (record.amountCents >= 0) {
-        totals.inflow += record.amountCents
+        totals.deposits += record.amountCents
       } else {
-        totals.outflow += Math.abs(record.amountCents)
+        totals.withdrawals += Math.abs(record.amountCents)
       }
       return totals
     },
-    { inflow: 0, outflow: 0 }
+    { deposits: 0, withdrawals: 0 }
   )
 }
