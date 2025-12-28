@@ -27,9 +27,6 @@ type GoalCardProps = {
 
 export function GoalCard({ goal, index }: GoalCardProps) {
   const gradient = FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length]
-  const progress = goal.targetAmountCents
-    ? Math.max(0, Math.min(1, goal.balanceCents / goal.targetAmountCents))
-    : null
 
   return (
     <Link
@@ -58,53 +55,52 @@ export function GoalCard({ goal, index }: GoalCardProps) {
           ) : (
             <div className="h-32 w-full" />
           )}
-          <CardHeader className="space-y-3">
-            <CardTitle className="text-xl font-semibold tracking-tight">
+          <CardHeader className="space-y-2 px-6 pb-2 pt-5">
+            <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400">
+              Goal
+            </p>
+            <CardTitle className="text-2xl font-semibold leading-tight tracking-tight text-white">
               {goal.name}
             </CardTitle>
             {goal.description ? (
-              <CardDescription className="text-slate-300">
+              <CardDescription className="text-sm leading-relaxed text-slate-300">
                 {goal.description}
               </CardDescription>
             ) : null}
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 pb-4 pt-2">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+              <p className="text-[0.65rem] uppercase tracking-[0.4em] text-slate-400">
                 Balance
               </p>
-              <p className="text-2xl font-semibold text-white">
+              <p className="text-3xl font-semibold text-white">
                 {formatCurrencyFromCents(goal.balanceCents)}
               </p>
             </div>
-            {progress !== null ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Target</span>
-                  <span>{Math.round(progress * 100)}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div
-                    className="h-2 rounded-full bg-emerald-400/80"
-                    style={{ width: `${Math.round(progress * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ) : null}
           </CardContent>
-          <CardFooter className="flex flex-wrap items-center gap-2">
+          <CardFooter className="flex flex-wrap items-center gap-2 px-6 pb-5 pt-2">
             {goal.champions.length ? (
               goal.champions.map((champion) => (
-                <Badge key={champion} variant="secondary" className="bg-white/10 text-white">
+                <Badge
+                  key={champion}
+                  variant="secondary"
+                  className="bg-white/10 text-white"
+                >
                   {champion}
                 </Badge>
               ))
             ) : (
-              <Badge variant="secondary" className="bg-white/10 text-white">
+              <Badge
+                variant="secondary"
+                className="bg-white/10 text-white"
+              >
                 Shared Goal
               </Badge>
             )}
-            <Badge variant="secondary" className="ml-auto bg-white/10 text-white">
+            <Badge
+              variant="secondary"
+              className="ml-auto bg-white/10 text-white"
+            >
               View
             </Badge>
           </CardFooter>
