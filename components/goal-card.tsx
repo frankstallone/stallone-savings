@@ -36,24 +36,22 @@ export function GoalCard({ goal, index }: GoalCardProps) {
     >
       <Card className="relative h-full overflow-hidden border-white/10 bg-slate-900/60 text-slate-100 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.8)]">
         <div className="absolute inset-0">
+          {goal.coverImageUrl ? (
+            <Image
+              src={goal.coverImageUrl}
+              alt={`${goal.name} cover`}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover opacity-70 transition duration-700 group-hover:scale-105"
+            />
+          ) : null}
           <div className={cn('absolute inset-0 bg-gradient-to-br', gradient)} />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.15),rgba(15,23,42,0.65)_45%,rgba(15,23,42,0.9))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_60%)]" />
         </div>
         <div className="relative">
-          {goal.coverImageUrl ? (
-            <div className="relative h-32 w-full overflow-hidden">
-              <Image
-                src={goal.coverImageUrl}
-                alt={`${goal.name} cover`}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover opacity-60 transition duration-500 group-hover:scale-105"
-              />
-            </div>
-          ) : (
-            <div className="h-32 w-full" />
-          )}
-          <CardHeader className="space-y-2 px-6 pb-2 pt-5">
+          <div className="h-40 w-full" />
+          <CardHeader className="space-y-2 px-6 pb-2 pt-2">
             <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400">
               Goal
             </p>
