@@ -1,6 +1,8 @@
+import { AddGoalDialog } from '@/components/add-goal-dialog'
 import { GoalCard } from '@/components/goal-card'
 import { getGoals } from '@/lib/data/goals'
 import { formatCurrencyFromCents } from '@/lib/format'
+import { PlusIcon } from 'lucide-react'
 
 export default async function HomePage() {
   const goals = await getGoals()
@@ -54,6 +56,32 @@ export default async function HomePage() {
                 No goals yet. Add your first bucket to start tracking.
               </div>
             )}
+            <AddGoalDialog
+              trigger={
+                <button
+                  type="button"
+                  className="group h-full w-full rounded-3xl border border-dashed border-white/15 bg-white/5 p-6 text-left text-slate-200 transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                />
+              }
+              triggerContent={
+                <div className="flex h-full flex-col items-start justify-between gap-6">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5">
+                    <PlusIcon className="h-5 w-5 text-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-400">
+                      New goal
+                    </p>
+                    <p className="text-lg font-semibold text-white">
+                      Add a new bucket
+                    </p>
+                    <p className="text-sm text-slate-400">
+                      Track a fresh savings target.
+                    </p>
+                  </div>
+                </div>
+              }
+            />
           </section>
         </div>
       </div>

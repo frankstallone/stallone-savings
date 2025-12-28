@@ -11,6 +11,11 @@ export type AddTransactionState = {
   fieldErrors?: Record<string, string>
 }
 
+export type DeleteGoalState = {
+  status: 'idle' | 'success' | 'error'
+  message?: string
+}
+
 export async function addTransactionAction(
   goalSlug: string,
   prevState: AddTransactionState,
@@ -75,4 +80,37 @@ export async function addTransactionAction(
     status: 'success',
     message: 'Transaction added.',
   }
+}
+
+export async function deleteGoalAction(
+  goalSlug: string,
+  prevState: DeleteGoalState,
+  formData: FormData,
+): Promise<DeleteGoalState> {
+  void prevState
+  void formData
+
+  const sql = getSql()
+  if (!sql) {
+    return {
+      status: 'error',
+      message: 'DATABASE_URL is not configured yet.',
+    }
+  }
+
+  const goalRows = await sql<{ id: string }[]>`
+    SELECT id FROM goals WHERE slug = ${goalSlug} LIMIT 1
+  `
+
+  const goal = goalRows[0]
+  if (!goal) {
+    return { status: 'error', message: 'Goal not found.' }
+  }
+
+  await sql`
+    DELETE FROM goals WHERE id = ${goal.id}
+  `
+
+  revalidatePath('/')
+  return { status: 'success', message: 'Goal deleted.' }
 }

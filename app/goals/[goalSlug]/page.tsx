@@ -2,14 +2,17 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { AddTransactionDialog } from '@/components/add-transaction-dialog'
+import { DeleteGoalDialog } from '@/components/delete-goal-dialog'
 import { GoalTransactionsTable } from '@/components/goal-transactions-table'
 import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { getGoalBySlug, getGoalTransactions } from '@/lib/data/goals'
 import {
   formatCurrencyFromCents,
   formatSignedCurrencyFromCents,
 } from '@/lib/format'
 import { splitDepositsWithdrawals, sumAmounts } from '@/lib/ledger'
+import { cn } from '@/lib/utils'
 
 interface GoalDetailPageProps {
   params: Promise<{ goalSlug: string }>
@@ -36,10 +39,19 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
         <div className="pointer-events-none absolute -top-32 left-0 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="relative mx-auto w-full max-w-5xl px-6 py-12">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href="/" className="text-sm text-slate-400 hover:text-white">
+            <Link
+              href="/"
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
+              )}
+            >
               ← Back to goals
             </Link>
-            <AddTransactionDialog goalSlug={goal.slug} goalName={goal.name} />
+            <div className="flex flex-wrap items-center gap-3">
+              <DeleteGoalDialog goalSlug={goal.slug} goalName={goal.name} />
+              <AddTransactionDialog goalSlug={goal.slug} goalName={goal.name} />
+            </div>
           </div>
 
           <section className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">

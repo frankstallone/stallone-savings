@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 const initialState: AddTransactionState = { status: 'idle' }
 
@@ -71,11 +72,15 @@ export function AddTransactionDialog({
 
   React.useEffect(() => {
     if (state.status === 'success') {
+      toast.success(state.message ?? 'Transaction added.')
       formRef.current?.reset()
       setSelectedDate(new Date())
       setOpen(false)
     }
-  }, [state.status])
+    if (state.status === 'error' && state.message) {
+      toast.error(state.message)
+    }
+  }, [state.status, state.message])
 
   const formattedDate = selectedDate
     ? format(selectedDate, 'PPP')
@@ -84,13 +89,7 @@ export function AddTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant="secondary" className="bg-white/10 text-white" />
-        }
-      >
-        Add transaction
-      </DialogTrigger>
+      <DialogTrigger render={<Button />}>Add transaction</DialogTrigger>
       <DialogContent className="border-white/10 bg-slate-950 text-slate-100 sm:max-w-xl">
         <DialogHeader className="space-y-2">
           <DialogTitle className="text-2xl">Add transaction</DialogTitle>
