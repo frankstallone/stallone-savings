@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { SignOutButton } from '@/components/auth-buttons'
 import { DeleteGoalDialog } from '@/components/delete-goal-dialog'
 import { GoalTransactionsTable } from '@/components/goal-transactions-table'
 import { RedirectToast } from '@/components/redirect-toast'
+import { UserMenu } from '@/components/user-menu'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { requireServerSession } from '@/lib/auth-session'
@@ -23,7 +23,7 @@ interface GoalDetailPageProps {
 
 export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { goalSlug } = await params
-  await requireServerSession()
+  const session = await requireServerSession()
   const goal = await getGoalBySlug(goalSlug)
   if (!goal) {
     notFound()
@@ -61,7 +61,7 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
               >
                 Add transaction
               </Link>
-              <SignOutButton className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10" />
+              <UserMenu user={session.user} />
             </div>
           </div>
 
@@ -102,45 +102,46 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
                 </Badge>
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-6 w-fit">
                 <p className="text-xs uppercase tracking-widest text-slate-400">
                   Current balance
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-white">
+                <p className="text-3xl font-semibold text-white">
                   {formatCurrencyFromCents(balance)}
                 </p>
                 {goal.targetAmountCents ? (
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="text-sm text-slate-400">
                     Target: {formatCurrencyFromCents(goal.targetAmountCents)}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4 justify-between">
+              <div className="flex flex-col">
                 <p className="text-xs uppercase tracking-widest text-slate-400">
                   Deposits
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-emerald-300">
+                <p className=" text-xl font-semibold">
                   {formatSignedCurrencyFromCents(deposits)}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="flex flex-col">
                 <p className="text-xs uppercase tracking-widest text-slate-400">
                   Withdrawals
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-rose-300">
+                <p className="text-xl font-semibold">
                   {withdrawals > 0
                     ? `-${formatSignedCurrencyFromCents(withdrawals)}`
                     : formatSignedCurrencyFromCents(withdrawals)}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+
+              <div className="flex flex-col">
                 <p className="text-xs uppercase tracking-widest text-slate-400">
                   Net movement
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-white">
+                <p className="text-xl font-semibold text-white">
                   {formatSignedCurrencyFromCents(balance)}
                 </p>
               </div>

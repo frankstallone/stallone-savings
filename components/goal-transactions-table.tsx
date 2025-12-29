@@ -88,7 +88,7 @@ export function GoalTransactionsTable({
   })
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-100 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.6)]">
+    <>
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-slate-400">
@@ -184,6 +184,6 @@ export function GoalTransactionsTable({
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   )
 }

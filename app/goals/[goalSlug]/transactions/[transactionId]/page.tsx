@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation'
 
 import { updateTransactionAction } from '@/app/goals/[goalSlug]/transactions/actions'
 import { DeleteTransactionDialog } from '@/components/delete-transaction-dialog'
-import { SignOutButton } from '@/components/auth-buttons'
 import { TransactionForm } from '@/components/transaction-form'
 import { buttonVariants } from '@/components/ui/button'
+import { UserMenu } from '@/components/user-menu'
 import { requireServerSession } from '@/lib/auth-session'
 import { getGoalBySlug } from '@/lib/data/goals'
 import { getGoalTransactionById } from '@/lib/data/transactions'
@@ -19,7 +19,7 @@ export default async function EditTransactionPage({
   params,
 }: EditTransactionPageProps) {
   const { goalSlug, transactionId } = await params
-  await requireServerSession()
+  const session = await requireServerSession()
   const goal = await getGoalBySlug(goalSlug)
   if (!goal) {
     notFound()
@@ -55,7 +55,7 @@ export default async function EditTransactionPage({
                 transactionId={transaction.id}
                 description={transaction.description}
               />
-              <SignOutButton className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10" />
+              <UserMenu user={session.user} />
             </div>
           </div>
 

@@ -1,7 +1,7 @@
-import { SignOutButton } from '@/components/auth-buttons'
 import { GoalCard } from '@/components/goal-card'
 import { GoalEmptyState } from '@/components/goal-empty-state'
 import { RedirectToast } from '@/components/redirect-toast'
+import { UserMenu } from '@/components/user-menu'
 import { getGoals } from '@/lib/data/goals'
 import { formatCurrencyFromCents } from '@/lib/format'
 import { requireServerSession } from '@/lib/auth-session'
@@ -11,7 +11,7 @@ import { PlusIcon } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function HomePage() {
-  await requireServerSession()
+  const session = await requireServerSession()
   const goals = (await getGoals()) as GoalSummary[]
   const totalBalance = goals.reduce(
     (sum: number, goal: { balanceCents: number }) => sum + goal.balanceCents,
@@ -31,7 +31,7 @@ export default async function HomePage() {
                 F4 Goal Tracker
               </p>
               <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                Savings goals, sorted by intent
+                Savings goals
               </h1>
               <p className="max-w-xl text-sm text-slate-400">
                 Keep every dollar tagged to a purpose. As deposits and
@@ -48,7 +48,7 @@ export default async function HomePage() {
                   {formatCurrencyFromCents(totalBalance)}
                 </p>
               </div>
-              <SignOutButton className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10" />
+              <UserMenu user={session.user} />
             </div>
           </header>
 

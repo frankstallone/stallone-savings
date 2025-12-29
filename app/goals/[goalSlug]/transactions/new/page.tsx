@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { addTransactionAction } from '@/app/goals/[goalSlug]/transactions/actions'
-import { SignOutButton } from '@/components/auth-buttons'
 import { TransactionForm } from '@/components/transaction-form'
 import { buttonVariants } from '@/components/ui/button'
+import { UserMenu } from '@/components/user-menu'
 import { requireServerSession } from '@/lib/auth-session'
 import { getGoalBySlug } from '@/lib/data/goals'
 import { cn } from '@/lib/utils'
@@ -17,7 +17,7 @@ export default async function NewTransactionPage({
   params,
 }: NewTransactionPageProps) {
   const { goalSlug } = await params
-  await requireServerSession()
+  const session = await requireServerSession()
   const goal = await getGoalBySlug(goalSlug)
   if (!goal) {
     notFound()
@@ -39,7 +39,7 @@ export default async function NewTransactionPage({
             >
               ← Back to goal
             </Link>
-            <SignOutButton className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10" />
+            <UserMenu user={session.user} />
           </div>
 
           <section className="mt-8 space-y-6">

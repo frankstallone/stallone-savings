@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
-import { SignOutButton } from '@/components/auth-buttons'
 import { NewGoalForm } from '@/components/new-goal-form'
+import { UserMenu } from '@/components/user-menu'
 import { buttonVariants } from '@/components/ui/button'
 import { requireServerSession } from '@/lib/auth-session'
 import { getAllowedUsers } from '@/lib/users'
@@ -27,7 +27,7 @@ export default async function NewGoalPage() {
             >
               ← Back to goals
             </Link>
-            <SignOutButton className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10" />
+            <UserMenu user={session.user} />
           </div>
 
           <section className="mt-8 space-y-6">
