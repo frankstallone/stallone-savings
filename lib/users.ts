@@ -1,27 +1,26 @@
 import { cache } from 'react'
 
 import { getAllowedEmails } from '@/lib/access-control'
-import { getSql } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { sampleUsers } from '@/lib/data/sample'
-import type { UserSummary } from '@/lib/types'
 
 export const getAllowedUsers = cache(async () => {
-  const sql = getSql()
-  if (!sql) return sampleUsers
+  const db = getDb()
+  if (!db) return sampleUsers
 
   const allowedEmails = getAllowedEmails()
   const rows = allowedEmails.length
-    ? ((await sql`
-        SELECT id, name, email
-        FROM "user"
-        WHERE email = ANY(${allowedEmails}::text[])
-        ORDER BY "createdAt" ASC
-      `) as UserSummary[])
-    : ((await sql`
-        SELECT id, name, email
-        FROM "user"
-        ORDER BY "createdAt" ASC
-      `) as UserSummary[])
+    ? await db
+        .selectFrom('user')
+        .select(['id', 'name', 'email'])
+        .where('email', 'in', allowedEmails)
+        .orderBy('createdAt', 'asc')
+        .execute()
+    : await db
+        .selectFrom('user')
+        .select(['id', 'name', 'email'])
+        .orderBy('createdAt', 'asc')
+        .execute()
 
   return rows.map((row) => ({
     id: row.id,

@@ -1,6 +1,6 @@
 # F4 Goal Tracker
 
-F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Base UI, and a Neon Postgres database. It lets you organize deposits and withdrawals into goals, view per‑goal ledgers, and choose Unsplash cover imagery with attribution.
+F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Base UI, Kysely, and a Neon Postgres database. It lets you organize deposits and withdrawals into goals, view per‑goal ledgers, and choose Unsplash cover imagery with attribution.
 
 ## Features
 
@@ -48,6 +48,10 @@ Optional seed data:
 ```bash
 npm run db:seed
 ```
+
+## Data Access
+
+Database access uses Kysely with a typed schema in `lib/db-types.ts`. The `getDb()` helper in `lib/db.ts` returns the Kysely instance. Prefer the query builder for standard CRUD, and use `sql\`...\`.execute(db)` when you need raw SQL.
 
 ## Scripts
 

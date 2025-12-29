@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { getSql } from '@/lib/db'
+import { getDb, sql } from '@/lib/db'
 import { groupTotalsByGoal } from '@/lib/ledger'
 import type { Champion, GoalSummary, GoalTransaction } from '@/lib/types'
 import { sampleGoalSummaries, sampleTransactions } from '@/lib/data/sample'
@@ -10,10 +10,10 @@ type GoalRow = Omit<GoalSummary, 'champions' | 'balanceCents'> & {
 }
 
 export const getGoals = cache(async () => {
-  const sql = getSql()
-  if (!sql) return sampleGoalSummaries
+  const db = getDb()
+  if (!db) return sampleGoalSummaries
 
-  const rows = (await sql`
+  const { rows } = await sql<GoalRow>`
     SELECT
       g.id,
       g.slug,
@@ -44,7 +44,7 @@ export const getGoals = cache(async () => {
       ) AS champions
     FROM goals g
     ORDER BY g.created_at DESC
-  `) as GoalRow[]
+  `.execute(db)
 
   return rows.map((row) => ({
     id: row.id,
@@ -63,12 +63,12 @@ export const getGoals = cache(async () => {
 })
 
 export const getGoalBySlug = cache(async (slug: string) => {
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return sampleGoalSummaries.find((goal) => goal.slug === slug) ?? null
   }
 
-  const rows = (await sql`
+  const { rows } = await sql<GoalRow>`
     SELECT
       g.id,
       g.slug,
@@ -100,7 +100,7 @@ export const getGoalBySlug = cache(async (slug: string) => {
     FROM goals g
     WHERE g.slug = ${slug}
     LIMIT 1
-  `) as GoalRow[]
+  `.execute(db)
 
   const row = rows[0]
   if (!row) return null
@@ -122,14 +122,14 @@ export const getGoalBySlug = cache(async (slug: string) => {
 })
 
 export const getGoalTransactions = cache(async (goalId: string) => {
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return sampleTransactions.filter(
       (transaction) => transaction.goalId === goalId,
     )
   }
 
-  const rows = (await sql`
+  const { rows } = await sql<GoalTransaction>`
     SELECT
       id,
       goal_id AS "goalId",
@@ -140,7 +140,7 @@ export const getGoalTransactions = cache(async (goalId: string) => {
     FROM goal_transactions
     WHERE goal_id = ${goalId}
     ORDER BY transacted_on DESC, created_at DESC
-  `) as GoalTransaction[]
+  `.execute(db)
 
   return rows.map((row) => ({
     ...row,
@@ -153,8 +153,8 @@ export const getGoalTransactions = cache(async (goalId: string) => {
 })
 
 export const getGoalTotals = cache(async () => {
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return groupTotalsByGoal(
       sampleTransactions.map((transaction) => ({
         goalId: transaction.goalId,
@@ -163,11 +163,11 @@ export const getGoalTotals = cache(async () => {
     )
   }
 
-  const rows = (await sql`
+  const { rows } = await sql<{ goalId: string; balance: number }>`
     SELECT goal_id AS "goalId", COALESCE(SUM(amount_cents), 0)::int AS balance
     FROM goal_transactions
     GROUP BY goal_id
-  `) as { goalId: string; balance: number }[]
+  `.execute(db)
 
   return rows.reduce<Record<string, number>>((totals, row) => {
     totals[row.goalId] = Number(row.balance)

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { getAuthorizedSession } from '@/lib/auth-session'
-import { getSql } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { normalizeTransactionPayload } from '@/lib/transactions'
 
 export type TransactionFormState = {
@@ -52,33 +52,33 @@ export async function addTransactionAction(
     }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return {
       status: 'error',
       message: 'DATABASE_URL is not configured yet.',
     }
   }
 
-  const goalRows = (await sql`
-    SELECT id FROM goals WHERE slug = ${goalSlug} LIMIT 1
-  `) as { id: string }[]
-
-  const goal = goalRows[0]
+  const goal = await db
+    .selectFrom('goals')
+    .select(['id'])
+    .where('slug', '=', goalSlug)
+    .executeTakeFirst()
   if (!goal) {
     return { status: 'error', message: 'Goal not found.' }
   }
 
-  await sql`
-    INSERT INTO goal_transactions (goal_id, description, amount_cents, transacted_on, created_by)
-    VALUES (
-      ${goal.id},
-      ${data.description},
-      ${data.amountCents},
-      ${data.transactedOn},
-      ${data.createdBy}
-    )
-  `
+  await db
+    .insertInto('goal_transactions')
+    .values({
+      goal_id: goal.id,
+      description: data.description,
+      amount_cents: data.amountCents,
+      transacted_on: data.transactedOn,
+      created_by: data.createdBy,
+    })
+    .execute()
 
   revalidatePath('/')
   revalidatePath(`/goals/${goalSlug}`)
@@ -125,35 +125,36 @@ export async function updateTransactionAction(
     }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return {
       status: 'error',
       message: 'DATABASE_URL is not configured yet.',
     }
   }
 
-  const rows = (await sql`
-    SELECT t.id
-    FROM goal_transactions t
-    JOIN goals g ON g.id = t.goal_id
-    WHERE g.slug = ${goalSlug} AND t.id = ${transactionId}
-    LIMIT 1
-  `) as { id: string }[]
+  const transaction = await db
+    .selectFrom('goal_transactions as t')
+    .innerJoin('goals as g', 'g.id', 't.goal_id')
+    .select(['t.id'])
+    .where('g.slug', '=', goalSlug)
+    .where('t.id', '=', transactionId)
+    .executeTakeFirst()
 
-  if (!rows[0]) {
+  if (!transaction) {
     return { status: 'error', message: 'Transaction not found.' }
   }
 
-  await sql`
-    UPDATE goal_transactions
-    SET
-      description = ${data.description},
-      amount_cents = ${data.amountCents},
-      transacted_on = ${data.transactedOn},
-      created_by = ${data.createdBy}
-    WHERE id = ${transactionId}
-  `
+  await db
+    .updateTable('goal_transactions')
+    .set({
+      description: data.description,
+      amount_cents: data.amountCents,
+      transacted_on: data.transactedOn,
+      created_by: data.createdBy,
+    })
+    .where('id', '=', transactionId)
+    .execute()
 
   revalidatePath('/')
   revalidatePath(`/goals/${goalSlug}`)
@@ -175,29 +176,30 @@ export async function deleteTransactionAction(
     return { status: 'error', message: 'Sign in required.' }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return {
       status: 'error',
       message: 'DATABASE_URL is not configured yet.',
     }
   }
 
-  const rows = (await sql`
-    SELECT t.id
-    FROM goal_transactions t
-    JOIN goals g ON g.id = t.goal_id
-    WHERE g.slug = ${goalSlug} AND t.id = ${transactionId}
-    LIMIT 1
-  `) as { id: string }[]
+  const transaction = await db
+    .selectFrom('goal_transactions as t')
+    .innerJoin('goals as g', 'g.id', 't.goal_id')
+    .select(['t.id'])
+    .where('g.slug', '=', goalSlug)
+    .where('t.id', '=', transactionId)
+    .executeTakeFirst()
 
-  if (!rows[0]) {
+  if (!transaction) {
     return { status: 'error', message: 'Transaction not found.' }
   }
 
-  await sql`
-    DELETE FROM goal_transactions WHERE id = ${transactionId}
-  `
+  await db
+    .deleteFrom('goal_transactions')
+    .where('id', '=', transactionId)
+    .execute()
 
   revalidatePath('/')
   revalidatePath(`/goals/${goalSlug}`)

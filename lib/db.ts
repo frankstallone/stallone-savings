@@ -1,15 +1,23 @@
-import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
+import { Pool } from '@neondatabase/serverless'
+import { Kysely, PostgresDialect } from 'kysely'
 
 import { getServerEnv } from '@/lib/env'
+import type { Database } from '@/lib/db-types'
 
-let sql: NeonQueryFunction<false, false> | null = null
+let db: Kysely<Database> | null = null
 
-export function getSql() {
+export function getDb() {
   if (process.env.NODE_ENV === 'test') return null
   const databaseUrl = getServerEnv().DATABASE_URL
   if (!databaseUrl) return null
-  if (!sql) {
-    sql = neon(databaseUrl)
+  if (!db) {
+    db = new Kysely<Database>({
+      dialect: new PostgresDialect({
+        pool: new Pool({ connectionString: databaseUrl }),
+      }),
+    })
   }
-  return sql
+  return db
 }
+
+export { sql } from 'kysely'

@@ -1,13 +1,13 @@
 import { cache } from 'react'
 
-import { getSql } from '@/lib/db'
+import { getDb, sql } from '@/lib/db'
 import type { GoalTransaction } from '@/lib/types'
 import { sampleTransactions } from '@/lib/data/sample'
 
 export const getGoalTransactionById = cache(
   async (goalId: string, transactionId: string) => {
-    const sql = getSql()
-    if (!sql) {
+    const db = getDb()
+    if (!db) {
       return (
         sampleTransactions.find(
           (transaction) =>
@@ -16,7 +16,7 @@ export const getGoalTransactionById = cache(
       )
     }
 
-    const rows = (await sql`
+    const { rows } = await sql<GoalTransaction>`
       SELECT
         id,
         goal_id AS "goalId",
@@ -28,7 +28,7 @@ export const getGoalTransactionById = cache(
       WHERE id = ${transactionId}
         AND goal_id = ${goalId}
       LIMIT 1
-    `) as GoalTransaction[]
+    `.execute(db)
 
     const row = rows[0]
     if (!row) return null

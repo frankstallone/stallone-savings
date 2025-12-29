@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { getAuthorizedSession } from '@/lib/auth-session'
 import { getAllowedEmails } from '@/lib/access-control'
-import { getSql } from '@/lib/db'
+import { getDb, sql } from '@/lib/db'
 import { normalizeGoalPayload } from '@/lib/goals'
 export type DeleteGoalState = {
   status: 'idle' | 'success' | 'error'
@@ -30,26 +30,24 @@ export async function deleteGoalAction(
     return { status: 'error', message: 'Sign in required.' }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return {
       status: 'error',
       message: 'DATABASE_URL is not configured yet.',
     }
   }
 
-  const goalRows = (await sql`
-    SELECT id FROM goals WHERE slug = ${goalSlug} LIMIT 1
-  `) as { id: string }[]
-
-  const goal = goalRows[0]
+  const goal = await db
+    .selectFrom('goals')
+    .select(['id'])
+    .where('slug', '=', goalSlug)
+    .executeTakeFirst()
   if (!goal) {
     return { status: 'error', message: 'Goal not found.' }
   }
 
-  await sql`
-    DELETE FROM goals WHERE id = ${goal.id}
-  `
+  await db.deleteFrom('goals').where('id', '=', goal.id).execute()
 
   revalidatePath('/')
   return { status: 'success', message: 'Goal deleted.' }
@@ -91,41 +89,40 @@ export async function updateGoalAction(
     }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return {
       status: 'error',
       message: 'DATABASE_URL is not configured yet.',
     }
   }
 
-  const goalRows = (await sql`
-    SELECT id FROM goals WHERE slug = ${goalSlug} LIMIT 1
-  `) as { id: string }[]
-
-  const goal = goalRows[0]
+  const goal = await db
+    .selectFrom('goals')
+    .select(['id'])
+    .where('slug', '=', goalSlug)
+    .executeTakeFirst()
   if (!goal) {
     return { status: 'error', message: 'Goal not found.' }
   }
 
-  await sql`
-    UPDATE goals
-    SET
-      name = ${data.name},
-      description = ${data.description},
-      cover_image_url = ${data.coverImageUrl},
-      cover_image_source = ${data.coverImageSource},
-      cover_image_attribution_name = ${data.coverImageAttributionName},
-      cover_image_attribution_url = ${data.coverImageAttributionUrl},
-      cover_image_id = ${data.coverImageId},
-      target_amount_cents = ${data.targetAmountCents},
-      updated_at = now()
-    WHERE id = ${goal.id}
-  `
+  await db
+    .updateTable('goals')
+    .set({
+      name: data.name,
+      description: data.description,
+      cover_image_url: data.coverImageUrl,
+      cover_image_source: data.coverImageSource,
+      cover_image_attribution_name: data.coverImageAttributionName,
+      cover_image_attribution_url: data.coverImageAttributionUrl,
+      cover_image_id: data.coverImageId,
+      target_amount_cents: data.targetAmountCents,
+      updated_at: sql`now()`,
+    })
+    .where('id', '=', goal.id)
+    .execute()
 
-  await sql`
-    DELETE FROM goal_champions WHERE goal_id = ${goal.id}
-  `
+  await db.deleteFrom('goal_champions').where('goal_id', '=', goal.id).execute()
 
   if (data.champions.length) {
     const allowedEmails = getAllowedEmails()
@@ -137,7 +134,7 @@ export async function updateGoalAction(
         WHERE u.id = ANY(${data.champions}::text[])
           AND u.email = ANY(${allowedEmails}::text[])
         ON CONFLICT DO NOTHING
-      `
+      `.execute(db)
     } else {
       await sql`
         INSERT INTO goal_champions (goal_id, user_id)
@@ -145,7 +142,7 @@ export async function updateGoalAction(
         FROM "user" u
         WHERE u.id = ANY(${data.champions}::text[])
         ON CONFLICT DO NOTHING
-      `
+      `.execute(db)
     }
   }
 

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { getAllowedEmails } from '@/lib/access-control'
 import { getAuthorizedSession } from '@/lib/auth-session'
-import { getSql } from '@/lib/db'
+import { getDb, sql } from '@/lib/db'
 import { normalizeGoalPayload, slugifyGoalName } from '@/lib/goals'
 
 export type AddGoalState = {
@@ -47,17 +47,17 @@ export async function addGoalAction(
     }
   }
 
-  const sql = getSql()
-  if (!sql) {
+  const db = getDb()
+  if (!db) {
     return { status: 'error', message: 'DATABASE_URL is not configured yet.' }
   }
 
   const baseSlug = slugifyGoalName(data.name)
-  const existingSlugs = (await sql`
-    SELECT slug
-    FROM goals
-    WHERE slug LIKE ${baseSlug + '%'}
-  `) as { slug: string }[]
+  const existingSlugs = await db
+    .selectFrom('goals')
+    .select(['slug'])
+    .where('slug', 'like', `${baseSlug}%`)
+    .execute()
 
   let slug = baseSlug
   if (existingSlugs.length) {
@@ -72,33 +72,23 @@ export async function addGoalAction(
     slug = `${baseSlug}-${maxSuffix + 1}`
   }
 
-  const goalRows = (await sql`
-    INSERT INTO goals (
+  const goal = await db
+    .insertInto('goals')
+    .values({
       slug,
-      name,
-      description,
-      cover_image_url,
-      cover_image_source,
-      cover_image_attribution_name,
-      cover_image_attribution_url,
-      cover_image_id,
-      target_amount_cents
-    )
-    VALUES (
-      ${slug},
-      ${data.name},
-      ${data.description},
-      ${data.coverImageUrl},
-      ${data.coverImageSource},
-      ${data.coverImageAttributionName},
-      ${data.coverImageAttributionUrl},
-      ${data.coverImageId},
-      ${data.targetAmountCents}
-    )
-    RETURNING id
-  `) as { id: string }[]
+      name: data.name,
+      description: data.description,
+      cover_image_url: data.coverImageUrl,
+      cover_image_source: data.coverImageSource,
+      cover_image_attribution_name: data.coverImageAttributionName,
+      cover_image_attribution_url: data.coverImageAttributionUrl,
+      cover_image_id: data.coverImageId,
+      target_amount_cents: data.targetAmountCents,
+    })
+    .returning('id')
+    .executeTakeFirst()
 
-  const goalId = goalRows[0]?.id
+  const goalId = goal?.id
   if (goalId && data.champions.length) {
     const allowedEmails = getAllowedEmails()
     if (allowedEmails.length) {
@@ -109,7 +99,7 @@ export async function addGoalAction(
         WHERE u.id = ANY(${data.champions}::text[])
           AND u.email = ANY(${allowedEmails}::text[])
         ON CONFLICT DO NOTHING
-      `
+      `.execute(db)
     } else {
       await sql`
         INSERT INTO goal_champions (goal_id, user_id)
@@ -117,7 +107,7 @@ export async function addGoalAction(
         FROM "user" u
         WHERE u.id = ANY(${data.champions}::text[])
         ON CONFLICT DO NOTHING
-      `
+      `.execute(db)
     }
   }
 

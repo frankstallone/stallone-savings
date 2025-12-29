@@ -6,6 +6,7 @@
 - `components/` holds app UI (goal cards, empty state, goal ledger table, new-goal form). `components/ui/` is shadcn/Base UI output.
 - `db/migrations/` holds SQL migrations (start with `001_init.sql` for goals tables).
 - `db/schema.sql` mirrors the app tables for quick reference.
+- `lib/db.ts` provides the Kysely connection; `lib/db-types.ts` defines typed tables/columns.
 - `scripts/` contains database tooling (`migrate.js`, `seed.js`).
 - `lib/` for utilities and data access: `lib/data/*`, `lib/ledger`, `lib/unsplash`.
 - Tests live in `lib/__tests__/` and `components/__tests__/`.
@@ -32,6 +33,7 @@
 - Tailwind: use standard utility sizes only (no `text-[…]` or `tracking-[…]`).
 - Component files in PascalCase; hooks/utilities in camelCase.
 - Route folders under `app/` should match URLs (lowercase).
+- Database access uses Kysely. Prefer the query builder; use `sql\`...\`.execute(db)` for complex SQL.
 
 ## Testing Guidelines
 
