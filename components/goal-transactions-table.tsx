@@ -14,7 +14,6 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
 import { formatLongDate, formatSignedCurrencyFromCents } from '@/lib/format'
 import type { GoalTransaction } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 const columns: ColumnDef<GoalTransaction>[] = [
   {
@@ -40,16 +39,7 @@ const columns: ColumnDef<GoalTransaction>[] = [
     header: 'Amount',
     cell: ({ row }) => {
       const amount = row.getValue<number>('amountCents')
-      return (
-        <span
-          className={cn(
-            'text-sm font-semibold',
-            amount >= 0 ? 'text-emerald-300' : 'text-rose-300',
-          )}
-        >
-          {formatSignedCurrencyFromCents(amount)}
-        </span>
-      )
+      return formatSignedCurrencyFromCents(amount)
     },
   },
   {
