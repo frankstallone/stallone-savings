@@ -162,7 +162,12 @@ export function GoalTransactionsTable({
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3">
+                    <td
+                      key={cell.id}
+                      className={`px-4 py-3 ${
+                        cell.column.id === 'amountCents' ? 'text-right' : ''
+                      }`}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
