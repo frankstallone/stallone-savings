@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 const TOAST_MESSAGES: Record<string, string> = {
   'goal-deleted': 'Goal deleted.',
+  'goal-updated': 'Goal updated.',
   'transaction-added': 'Transaction added.',
   'transaction-updated': 'Transaction updated.',
   'transaction-deleted': 'Transaction deleted.',

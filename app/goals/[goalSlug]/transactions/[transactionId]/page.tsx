@@ -9,6 +9,7 @@ import { UserMenu } from '@/components/user-menu'
 import { requireServerSession } from '@/lib/auth-session'
 import { getGoalBySlug } from '@/lib/data/goals'
 import { getGoalTransactionById } from '@/lib/data/transactions'
+import { getAllowedUsers } from '@/lib/users'
 import { cn } from '@/lib/utils'
 
 interface EditTransactionPageProps {
@@ -24,6 +25,7 @@ export default async function EditTransactionPage({
   if (!goal) {
     notFound()
   }
+  const userOptions = await getAllowedUsers()
 
   const transaction = await getGoalTransactionById(goal.id, transactionId)
   if (!transaction) {
@@ -82,6 +84,7 @@ export default async function EditTransactionPage({
                 successRedirect={`/goals/${goal.slug}`}
                 successToastKey="transaction-updated"
                 cancelHref={`/goals/${goal.slug}`}
+                userOptions={userOptions}
                 initialValues={{
                   description: transaction.description,
                   amount: amountValue,

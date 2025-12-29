@@ -21,7 +21,14 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@/components/ui/input-group'
-import { Input } from '@/components/ui/input'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox'
 import {
   Popover,
   PopoverContent,
@@ -35,6 +42,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import type { UserSummary } from '@/lib/types'
+import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -55,6 +64,7 @@ type TransactionFormProps = {
   successToastKey: string
   cancelHref: string
   initialValues?: TransactionFormValues
+  userOptions?: UserSummary[]
   submitLabel?: string
   pendingLabel?: string
 }
@@ -70,6 +80,7 @@ export function TransactionForm({
   successToastKey,
   cancelHref,
   initialValues,
+  userOptions = [],
   submitLabel = 'Save transaction',
   pendingLabel = 'Saving...',
 }: TransactionFormProps) {
@@ -78,9 +89,33 @@ export function TransactionForm({
     action,
     initialState,
   )
+  const [formValues, setFormValues] = React.useState(() => ({
+    description: initialValues?.description ?? '',
+    amount: initialValues?.amount ?? '',
+    direction: initialValues?.direction ?? 'deposit',
+    createdBy: initialValues?.createdBy ?? '',
+  }))
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(() =>
     toDate(initialValues?.transactedOn),
   )
+
+  React.useEffect(() => {
+    setFormValues({
+      description: initialValues?.description ?? '',
+      amount: initialValues?.amount ?? '',
+      direction: initialValues?.direction ?? 'deposit',
+      createdBy: initialValues?.createdBy ?? '',
+    })
+  }, [
+    initialValues?.amount,
+    initialValues?.createdBy,
+    initialValues?.description,
+    initialValues?.direction,
+  ])
+
+  React.useEffect(() => {
+    setSelectedDate(toDate(initialValues?.transactedOn))
+  }, [initialValues?.transactedOn])
 
   React.useEffect(() => {
     if (state.status === 'success') {
@@ -95,6 +130,12 @@ export function TransactionForm({
     ? format(selectedDate, 'PPP')
     : 'Pick a date'
   const dateValue = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''
+  const createdByItems = React.useMemo(() => {
+    const items = userOptions
+      .map((option) => getUserLabel(option))
+      .filter((label) => label && label !== 'Unknown')
+    return Array.from(new Set(items))
+  }, [userOptions])
 
   return (
     <Form action={formAction} className="space-y-6">
@@ -110,7 +151,13 @@ export function TransactionForm({
                 'min-h-[88px] bg-white/5',
                 state.fieldErrors?.description && 'border-rose-400',
               )}
-              defaultValue={initialValues?.description ?? ''}
+              value={formValues.description}
+              onChange={(event) =>
+                setFormValues((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
+              }
               required
             />
             <FieldError>{state.fieldErrors?.description}</FieldError>
@@ -135,7 +182,13 @@ export function TransactionForm({
                 step="0.01"
                 min="0"
                 placeholder="0.00"
-                defaultValue={initialValues?.amount ?? ''}
+                value={formValues.amount}
+                onChange={(event) =>
+                  setFormValues((prev) => ({
+                    ...prev,
+                    amount: event.target.value,
+                  }))
+                }
                 required
               />
               <InputGroupAddon align="inline-end">
@@ -150,7 +203,13 @@ export function TransactionForm({
           <FieldContent>
             <Select
               name="direction"
-              defaultValue={initialValues?.direction ?? 'deposit'}
+              value={formValues.direction}
+              onValueChange={(value) =>
+                setFormValues((prev) => ({
+                  ...prev,
+                  direction: value as 'deposit' | 'withdrawal',
+                }))
+              }
               itemToStringLabel={(value) =>
                 value === 'withdrawal' ? 'Withdrawal' : 'Deposit'
               }
@@ -209,13 +268,42 @@ export function TransactionForm({
       <Field>
         <FieldLabel htmlFor="createdBy">By (optional)</FieldLabel>
         <FieldContent>
-          <Input
-            id="createdBy"
-            name="createdBy"
-            placeholder="Frank or Owner One"
-            className="bg-white/5"
-            defaultValue={initialValues?.createdBy ?? ''}
-          />
+          <Combobox
+            value={formValues.createdBy}
+            onValueChange={(value) =>
+              setFormValues((prev) => ({
+                ...prev,
+                createdBy: value ?? '',
+              }))
+            }
+            inputValue={formValues.createdBy}
+            onInputValueChange={(value) =>
+              setFormValues((prev) => ({
+                ...prev,
+                createdBy: value ?? '',
+              }))
+            }
+            items={createdByItems}
+          >
+            <ComboboxInput
+              id="createdBy"
+              name="createdBy"
+              placeholder={
+                createdByItems.length ? 'Select a person...' : 'Enter a name...'
+              }
+              showClear
+            />
+            <ComboboxContent>
+              <ComboboxEmpty>No matches found.</ComboboxEmpty>
+              <ComboboxList>
+                {(item) => (
+                  <ComboboxItem key={item} value={item}>
+                    {item}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </FieldContent>
       </Field>
 

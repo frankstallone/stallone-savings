@@ -49,12 +49,14 @@ type EditGoalFormProps = {
   goal: Goal
   championOptions: UserSummary[]
   defaultChampionIds?: string[]
+  successRedirect?: string
 }
 
 export function EditGoalForm({
   goal,
   championOptions,
   defaultChampionIds = [],
+  successRedirect,
 }: EditGoalFormProps) {
   const router = useRouter()
   const championAnchor = useComboboxAnchor()
@@ -110,12 +112,16 @@ export function EditGoalForm({
   React.useEffect(() => {
     if (state.status === 'success') {
       toast.success(state.message ?? 'Goal updated.')
-      router.refresh()
+      if (successRedirect) {
+        router.push(`${successRedirect}?toast=goal-updated`)
+      } else {
+        router.refresh()
+      }
     }
     if (state.status === 'error' && state.message) {
       toast.error(state.message)
     }
-  }, [router, state.message, state.status])
+  }, [router, state.message, state.status, successRedirect])
 
   const runSearch = React.useCallback(async (query: string) => {
     const normalized = query.trim()

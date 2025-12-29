@@ -1,29 +1,27 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { addTransactionAction } from '@/app/goals/[goalSlug]/transactions/actions'
-import { TransactionForm } from '@/components/transaction-form'
-import { buttonVariants } from '@/components/ui/button'
+import { EditGoalForm } from '@/components/edit-goal-form'
 import { UserMenu } from '@/components/user-menu'
+import { buttonVariants } from '@/components/ui/button'
 import { requireServerSession } from '@/lib/auth-session'
 import { getGoalBySlug } from '@/lib/data/goals'
 import { getAllowedUsers } from '@/lib/users'
 import { cn } from '@/lib/utils'
 
-interface NewTransactionPageProps {
+interface EditGoalPageProps {
   params: Promise<{ goalSlug: string }>
 }
 
-export default async function NewTransactionPage({
-  params,
-}: NewTransactionPageProps) {
+export default async function EditGoalPage({ params }: EditGoalPageProps) {
   const { goalSlug } = await params
   const session = await requireServerSession()
   const goal = await getGoalBySlug(goalSlug)
   if (!goal) {
     notFound()
   }
-  const userOptions = await getAllowedUsers()
+  const championOptions = await getAllowedUsers()
+  const defaultChampionIds = goal.champions.map((champion) => champion.id)
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -47,23 +45,22 @@ export default async function NewTransactionPage({
           <section className="mt-8 space-y-6">
             <div>
               <p className="text-xs uppercase tracking-widest text-slate-400">
-                New transaction
+                Edit goal
               </p>
               <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-                Add movement for {goal.name}
+                Update {goal.name}
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-slate-400">
-                Log a deposit or withdrawal to keep the ledger current.
+                Adjust the goal name, target, champions, or cover image.
               </p>
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
-              <TransactionForm
-                action={addTransactionAction.bind(null, goal.slug)}
+              <EditGoalForm
+                goal={goal}
+                championOptions={championOptions}
+                defaultChampionIds={defaultChampionIds}
                 successRedirect={`/goals/${goal.slug}`}
-                successToastKey="transaction-added"
-                cancelHref={`/goals/${goal.slug}`}
-                userOptions={userOptions}
               />
             </div>
           </section>
