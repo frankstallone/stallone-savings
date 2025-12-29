@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { DeleteGoalDialog } from '@/components/delete-goal-dialog'
+import { EditGoalForm } from '@/components/edit-goal-form'
 import { GoalTransactionsTable } from '@/components/goal-transactions-table'
 import { RedirectToast } from '@/components/redirect-toast'
 import { UserMenu } from '@/components/user-menu'
@@ -14,6 +15,7 @@ import {
   formatSignedCurrencyFromCents,
 } from '@/lib/format'
 import { splitDepositsWithdrawals, sumAmounts } from '@/lib/ledger'
+import { getAllowedUsers } from '@/lib/users'
 import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +30,8 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   if (!goal) {
     notFound()
   }
+  const championOptions = await getAllowedUsers()
+  const defaultChampionIds = goal.champions.map((champion) => champion.id)
 
   const transactions = await getGoalTransactions(goal.id)
   const balanceFromTransactions = sumAmounts(transactions)
@@ -145,6 +149,28 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
                   {formatSignedCurrencyFromCents(balance)}
                 </p>
               </div>
+            </div>
+          </section>
+
+          <section className="mt-12 space-y-6">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-slate-400">
+                Edit goal
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+                Update goal details
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm text-slate-400">
+                Adjust the goal name, target, champions, or cover image without
+                leaving this page.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
+              <EditGoalForm
+                goal={goal}
+                championOptions={championOptions}
+                defaultChampionIds={defaultChampionIds}
+              />
             </div>
           </section>
 

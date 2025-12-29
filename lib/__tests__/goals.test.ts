@@ -49,6 +49,32 @@ describe('normalizeGoalPayload', () => {
       targetAmount: 'Enter a positive target amount.',
     })
   })
+
+  it('normalizes empty optional fields', () => {
+    const result = normalizeGoalPayload({
+      name: 'Vacation',
+      description: '',
+      targetAmount: '',
+      coverImageUrl: '',
+      coverImageSource: '',
+      coverImageAttributionName: '',
+      coverImageAttributionUrl: '',
+      coverImageId: '',
+      champions: '',
+    })
+
+    expect(result.data).toEqual({
+      name: 'Vacation',
+      description: null,
+      targetAmountCents: null,
+      coverImageUrl: null,
+      coverImageSource: null,
+      coverImageAttributionName: null,
+      coverImageAttributionUrl: null,
+      coverImageId: null,
+      champions: [],
+    })
+  })
 })
 
 describe('slugifyGoalName', () => {
