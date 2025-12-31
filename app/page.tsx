@@ -27,9 +27,6 @@ export default async function HomePage() {
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12">
           <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-widest text-slate-400">
-                F4 Goal Tracker
-              </p>
               <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
                 Savings goals
               </h1>
