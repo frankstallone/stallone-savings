@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { GoalCard } from '@/components/goal-card'
+import { PageHeader } from '@/components/page-header'
 import { RedirectToast } from '@/components/redirect-toast'
 import { UserMenu } from '@/components/user-menu'
 import { buttonVariants } from '@/components/ui/button'
@@ -19,28 +20,25 @@ export default async function ArchivedGoalsPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.16),transparent_55%)]" />
         <div className="pointer-events-none absolute -top-32 right-0 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12">
-          <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/"
-                  className={cn(
-                    buttonVariants({ variant: 'outline' }),
-                    'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
-                  )}
-                >
-                  Back to goals
-                </Link>
-              </div>
-              <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                Archived goals
-              </h1>
-              <p className="max-w-xl text-sm text-slate-400">
-                Read-only goals kept for reference, transfers, and history.
-              </p>
+          <PageHeader
+            title="Archived goals"
+            description="Read-only goals kept for reference, transfers, and history."
+            titleClassName="md:text-5xl"
+            descriptionClassName="max-w-xl"
+          >
+            <div className="flex gap-2 items-center">
+              <Link
+                href="/"
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
+                )}
+              >
+                Back
+              </Link>
+              <UserMenu user={session.user} />
             </div>
-            <UserMenu user={session.user} />
-          </header>
+          </PageHeader>
 
           <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {goals.length ? (

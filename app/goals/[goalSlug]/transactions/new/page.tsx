@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { addTransactionAction } from '@/app/goals/[goalSlug]/transactions/actions'
+import { PageHeader } from '@/components/page-header'
 import { TransactionForm } from '@/components/transaction-form'
 import { buttonVariants } from '@/components/ui/button'
 import { UserMenu } from '@/components/user-menu'
@@ -34,32 +35,25 @@ export default async function NewTransactionPage({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute -top-32 left-0 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="relative mx-auto w-full max-w-4xl px-6 py-12">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link
-              href={`/goals/${goal.slug}`}
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
-              )}
-            >
-              ← Back to goal
-            </Link>
-            <UserMenu user={session.user} />
-          </div>
-
-          <section className="mt-8 space-y-6">
-            <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400">
-                New transaction
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-                Add movement for {goal.name}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm text-slate-400">
-                Log a deposit or withdrawal to keep the ledger current.
-              </p>
+          <PageHeader
+            title={`Add movement for ${goal.name}`}
+            description="Log a deposit or withdrawal to keep the ledger current."
+          >
+            <div className="flex gap-2 items-center">
+              <Link
+                href={`/goals/${goal.slug}`}
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
+                )}
+              >
+                Back
+              </Link>
+              <UserMenu user={session.user} />
             </div>
+          </PageHeader>
 
+          <section className="mt-8">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
               <TransactionForm
                 action={addTransactionAction.bind(null, goal.slug)}

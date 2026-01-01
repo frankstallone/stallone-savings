@@ -1,8 +1,10 @@
 import { GoalCard } from '@/components/goal-card'
 import { GoalEmptyState } from '@/components/goal-empty-state'
+import { PageHeader } from '@/components/page-header'
 import { RedirectToast } from '@/components/redirect-toast'
 import { UserMenu } from '@/components/user-menu'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +16,7 @@ import { formatCurrencyFromCents } from '@/lib/format'
 import { requireServerSession } from '@/lib/auth-session'
 import type { GoalSummary } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { MoreVertical, PlusIcon } from 'lucide-react'
+import { Ellipsis, PlusIcon } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function HomePage() {
@@ -32,58 +34,54 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute -top-32 right-0 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12">
-          <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                Savings goals
-              </h1>
-              <p className="max-w-xl text-sm text-slate-400">
-                Keep every dollar tagged to a purpose. As deposits and
-                withdrawals hit the account, you can see which goals grow and
-                which ones need attention.
+          <PageHeader
+            title="Savings goals"
+            description="Keep every dollar tagged to a purpose. As deposits and withdrawals hit the account, you can see which goals grow and which ones need attention."
+            titleClassName="md:text-5xl"
+            descriptionClassName="max-w-xl"
+          >
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-widest text-slate-400">
+                Total balance
+              </p>
+              <p className="text-lg font-semibold text-white">
+                {formatCurrencyFromCents(totalBalance)}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-right">
-                <p className="text-xs uppercase tracking-widest text-slate-400">
-                  Total balance
-                </p>
-                <p className="text-2xl font-semibold text-white">
-                  {formatCurrencyFromCents(totalBalance)}
-                </p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
-                      aria-label="Open goal actions"
-                    />
-                  }
-                >
-                  <MoreVertical />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="border-white/10 bg-slate-950 text-slate-100"
-                >
-                  <DropdownMenuItem
-                    render={<Link href="/goals/new" className="w-full" />}
+            <div className="flex gap-2 items-center">
+              <ButtonGroup>
+                <Link href="/goals/new" className={cn(buttonVariants())}>
+                  New goal
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="default"
+                        size="icon"
+                        aria-label="Open goal actions"
+                      />
+                    }
                   >
-                    New goal
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    render={<Link href="/goals/archived" className="w-full" />}
+                    <Ellipsis />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="border-white/10 bg-slate-950 text-slate-100"
                   >
-                    Archived goals
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem
+                      render={
+                        <Link href="/goals/archived" className="w-full" />
+                      }
+                    >
+                      Archived goals
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </ButtonGroup>
               <UserMenu user={session.user} />
             </div>
-          </header>
+          </PageHeader>
 
           <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {goals.length ? (

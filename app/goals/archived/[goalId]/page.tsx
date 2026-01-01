@@ -4,10 +4,12 @@ import { notFound, redirect } from 'next/navigation'
 import { UnarchiveGoalDialog } from '@/components/archive-goal-dialog'
 import { DeleteGoalDialog } from '@/components/delete-goal-dialog'
 import { GoalTransactionsTable } from '@/components/goal-transactions-table'
+import { PageHeader } from '@/components/page-header'
 import { RedirectToast } from '@/components/redirect-toast'
 import { UserMenu } from '@/components/user-menu'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +27,7 @@ import {
 import { splitDepositsWithdrawals, sumAmounts } from '@/lib/ledger'
 import { getUserLabel } from '@/lib/user-label'
 import { cn } from '@/lib/utils'
-import { MoreVertical } from 'lucide-react'
+import { Ellipsis } from 'lucide-react'
 
 interface ArchivedGoalDetailPageProps {
   params: Promise<{ goalId: string }>
@@ -58,7 +60,10 @@ export default async function ArchivedGoalDetailPage({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.18),transparent_55%)]" />
         <div className="pointer-events-none absolute -top-32 left-0 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="relative mx-auto w-full max-w-5xl px-6 py-12">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <PageHeader
+            title={goal.name}
+            description={goal.description || undefined}
+          >
             <Link
               href="/goals/archived"
               className={cn(
@@ -66,33 +71,31 @@ export default async function ArchivedGoalDetailPage({
                 'border-white/10 bg-white/5 text-slate-100 hover:bg-white/10',
               )}
             >
-              Back to archived
+              Back
             </Link>
-            <div className="flex flex-wrap items-center gap-3">
+            <ButtonGroup>
+              <UnarchiveGoalDialog
+                goalId={goal.id}
+                goalSlug={goal.slug}
+                goalName={goal.name}
+                trigger={<Button />}
+              />
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="icon"
-                      className="border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
                       aria-label="Open goal actions"
                     />
                   }
                 >
-                  <MoreVertical />
+                  <Ellipsis />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
                   className="border-white/10 bg-slate-950 text-slate-100"
                 >
-                  <UnarchiveGoalDialog
-                    goalId={goal.id}
-                    goalSlug={goal.slug}
-                    goalName={goal.name}
-                    trigger={<DropdownMenuItem />}
-                  />
-                  <DropdownMenuSeparator className="bg-white/10" />
                   <DeleteGoalDialog
                     goalId={goal.id}
                     goalName={goal.name}
@@ -101,26 +104,12 @@ export default async function ArchivedGoalDetailPage({
                   />
                 </DropdownMenuContent>
               </DropdownMenu>
-              <UserMenu user={session.user} />
-            </div>
-          </div>
+            </ButtonGroup>
+            <UserMenu user={session.user} />
+          </PageHeader>
 
           <section className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div className="space-y-6">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-400">
-                  Archived goal
-                </p>
-                <h1 className="text-4xl font-semibold tracking-tight">
-                  {goal.name}
-                </h1>
-                {goal.description ? (
-                  <p className="mt-3 text-sm text-slate-400">
-                    {goal.description}
-                  </p>
-                ) : null}
-              </div>
-
               <div className="flex flex-wrap items-center gap-3">
                 {goal.champions.length ? (
                   goal.champions.map((champion) => (
