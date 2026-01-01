@@ -47,7 +47,7 @@ export function PageHeader({
         ) : null}
       </div>
       {children ? (
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-4">
           {children}
         </div>
       ) : null}
