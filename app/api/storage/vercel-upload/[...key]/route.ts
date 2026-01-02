@@ -2,6 +2,7 @@ import { put } from '@vercel/blob'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+import { getAuthorizedSession } from '@/lib/auth-session'
 import { getServerEnv, requireEnv } from '@/lib/env'
 import {
   ALLOWED_IMAGE_CONTENT_TYPES,
@@ -16,6 +17,11 @@ type RouteContext = {
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
+  const session = await getAuthorizedSession()
+  if (!session) {
+    return NextResponse.json({ error: 'Sign in required.' }, { status: 401 })
+  }
+
   const env = getServerEnv()
   if (env.STORAGE_PROVIDER !== 'vercel') {
     return NextResponse.json(

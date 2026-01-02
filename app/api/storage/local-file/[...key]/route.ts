@@ -4,6 +4,7 @@ import path from 'node:path'
 import type { NextRequest } from 'next/server'
 
 import { getServerEnv } from '@/lib/env'
+import { DEFAULT_CACHE_CONTROL } from '@/lib/storage/constants'
 import {
   getLocalStorageConfig,
   resolveLocalStoragePath,
@@ -53,7 +54,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     return new Response(file, {
       headers: {
         'Content-Type': getContentType(key),
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': DEFAULT_CACHE_CONTROL,
       },
     })
   } catch (error) {

@@ -32,11 +32,22 @@ function parseBoolean(value?: string) {
   return value === '1' || value.toLowerCase() === 'true'
 }
 
+const ALLOWED_STORAGE_PROVIDERS: StorageProvider[] = ['s3', 'vercel', 'local']
+
 function getProvider(envProvider?: string): StorageProvider {
   if (!envProvider) {
     return 's3'
   }
-  return envProvider as StorageProvider
+
+  if (ALLOWED_STORAGE_PROVIDERS.includes(envProvider as StorageProvider)) {
+    return envProvider as StorageProvider
+  }
+
+  throw new Error(
+    `Invalid STORAGE_PROVIDER value: ${envProvider}. Expected one of: ${ALLOWED_STORAGE_PROVIDERS.join(
+      ', ',
+    )}.`,
+  )
 }
 
 export function getStorageAdapter() {

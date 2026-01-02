@@ -94,7 +94,7 @@ Uploads are proxied through `/api/storage/vercel-upload` when using the Vercel a
 
 ### Local development (optional)
 
-Uses local disk plus the built-in dev routes at `app/api/storage/local-*`.
+Uses local disk plus the built-in dev routes at `app/api/storage/local-*`. Intended for development; files are served publicly via `LOCAL_STORAGE_PUBLIC_URL_BASE`.
 
 ```bash
 STORAGE_PROVIDER=local
