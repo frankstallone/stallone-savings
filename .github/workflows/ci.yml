@@ -1,33 +1,41 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test
+
   build:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: postgres://user:password@localhost:5432/dbname
-      BETTER_AUTH_SECRET: test-secret
-      BETTER_AUTH_URL: http://localhost:3000
-      GOOGLE_CLIENT_ID: test-client-id
-      GOOGLE_CLIENT_SECRET: test-client-secret
-      UNSPLASH_ACCESS_KEY: test-unsplash-key
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: 24
           cache: npm
-      - name: Install
-        run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Test
-        run: npm test
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run build
