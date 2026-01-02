@@ -31,6 +31,13 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      UNSPLASH_ACCESS_KEY: test
+      BETTER_AUTH_SECRET: test
+      BETTER_AUTH_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: test
+      GOOGLE_CLIENT_SECRET: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
