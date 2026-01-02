@@ -9,6 +9,20 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
   ALLOWED_EMAILS: z.string().optional(),
   VERCEL_URL: z.string().optional(),
+  STORAGE_PROVIDER: z.enum(['s3', 'vercel', 'local']).optional(),
+  STORAGE_UPLOAD_URL_TTL_SECONDS: z.string().optional(),
+  S3_REGION: z.string().optional(),
+  S3_ENDPOINT: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
+  S3_PUBLIC_URL_BASE: z.string().optional(),
+  S3_FORCE_PATH_STYLE: z.string().optional(),
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
+  BLOB_PUBLIC_URL_BASE: z.string().optional(),
+  LOCAL_STORAGE_PATH: z.string().optional(),
+  LOCAL_STORAGE_PUBLIC_URL_BASE: z.string().optional(),
+  LOCAL_STORAGE_UPLOAD_URL_BASE: z.string().optional(),
 })
 
 type ServerEnv = z.infer<typeof envSchema>

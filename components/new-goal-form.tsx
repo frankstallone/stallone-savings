@@ -3,7 +3,6 @@
 import * as React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-
 import { addGoalAction, type AddGoalState } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,6 +32,11 @@ import {
   useComboboxAnchor,
 } from '@/components/ui/combobox'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  ALLOWED_IMAGE_CONTENT_TYPES,
+  MAX_UPLOAD_BYTES,
+} from '@/lib/storage/constants'
+import type { StorageUploadTarget } from '@/lib/storage/types'
 import type { UserSummary } from '@/lib/types'
 import { createDebouncer } from '@/lib/debounce'
 import { MIN_UNSPLASH_QUERY_LENGTH, shouldSearchUnsplash } from '@/lib/unsplash'
@@ -77,6 +81,9 @@ export function NewGoalForm({
   const [coverImageAttributionUrl, setCoverImageAttributionUrl] =
     React.useState('')
   const [coverImageId, setCoverImageId] = React.useState('')
+  const [isUploading, setIsUploading] = React.useState(false)
+  const [uploadError, setUploadError] = React.useState<string | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [searchResults, setSearchResults] = React.useState<
     Array<{
@@ -202,6 +209,10 @@ export function NewGoalForm({
     setCoverImageAttributionName(photo.user.name ?? 'Unsplash')
     setCoverImageAttributionUrl(attributionUrl)
     setCoverImageId(photo.id)
+    setUploadError(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
 
     if (photo.links.downloadLocation) {
       void fetch('/api/unsplash/download', {
@@ -214,19 +225,103 @@ export function NewGoalForm({
     }
   }
 
-  const handleCustomUrl = (value: string) => {
-    setCoverImageUrl(value)
-    if (!value) {
-      setCoverImageSource('')
-      setCoverImageAttributionName('')
-      setCoverImageAttributionUrl('')
-      setCoverImageId('')
-      return
-    }
-    setCoverImageSource('custom')
+  const maxUploadMegabytes = Math.round(MAX_UPLOAD_BYTES / (1024 * 1024))
+
+  const resetCoverImage = () => {
+    setCoverImageUrl('')
+    setCoverImageSource('')
     setCoverImageAttributionName('')
     setCoverImageAttributionUrl('')
     setCoverImageId('')
+    setUploadError(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const requestUploadTarget = async (file: File) => {
+    const response = await fetch('/api/storage/upload-target', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contentType: file.type,
+        contentLength: file.size,
+      }),
+    })
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      const message =
+        payload?.error || 'Unable to prepare the upload. Try again.'
+      throw new Error(message)
+    }
+
+    const data = (await response.json()) as { target?: StorageUploadTarget }
+    if (!data.target) {
+      throw new Error('Upload target unavailable.')
+    }
+    return data.target
+  }
+
+  const handleUploadChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      return
+    }
+
+    setUploadError(null)
+
+    const isAllowedType = ALLOWED_IMAGE_CONTENT_TYPES.includes(
+      file.type as (typeof ALLOWED_IMAGE_CONTENT_TYPES)[number],
+    )
+    if (!file.type || !isAllowedType) {
+      setUploadError(
+        'Unsupported file type. Choose a JPG, PNG, WEBP, GIF, or AVIF.',
+      )
+      event.currentTarget.value = ''
+      return
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setUploadError(`Image is too large. Max ${maxUploadMegabytes}MB.`)
+      event.currentTarget.value = ''
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const target = await requestUploadTarget(file)
+      const uploadResponse = await fetch(target.url, {
+        method: 'PUT',
+        headers: target.headers,
+        body: file,
+      })
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed. Try again.')
+      }
+
+      if (target.kind === 'proxy-put') {
+        const payload = await uploadResponse.json().catch(() => null)
+        setCoverImageUrl(payload?.url ?? target.publicUrl)
+      } else {
+        setCoverImageUrl(target.publicUrl)
+      }
+
+      setCoverImageSource('upload')
+      setCoverImageAttributionName('')
+      setCoverImageAttributionUrl('')
+      setCoverImageId(target.key)
+      setUploadError(null)
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : 'Upload failed. Try again.',
+      )
+    } finally {
+      setIsUploading(false)
+      event.currentTarget.value = ''
+    }
   }
 
   const handleChampionsChange = (nextValues: string[] | null) => {
@@ -295,7 +390,7 @@ export function NewGoalForm({
       </Field>
 
       <Field>
-        <FieldLabel>Cover image (Unsplash)</FieldLabel>
+        <FieldLabel>Cover image</FieldLabel>
         <FieldContent>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-3">
@@ -380,23 +475,43 @@ export function NewGoalForm({
                   </p>
                 ) : (
                   <p className="mt-2 text-sm text-slate-200">
-                    Custom image selected.
+                    Uploaded image selected.
                   </p>
                 )}
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={resetCoverImage}
+                  >
+                    Remove cover image
+                  </Button>
+                </div>
               </div>
             ) : null}
 
             <div className="space-y-2">
-              <FieldLabel htmlFor="coverImageCustomUrl">
-                Custom image URL (optional)
+              <FieldLabel htmlFor="coverImageUpload">
+                Upload your own image (optional)
               </FieldLabel>
               <Input
-                id="coverImageCustomUrl"
-                placeholder="https://images.unsplash.com/..."
+                id="coverImageUpload"
+                ref={fileInputRef}
+                type="file"
+                accept={ALLOWED_IMAGE_CONTENT_TYPES.join(',')}
                 className="bg-white/5"
-                value={coverImageSource === 'custom' ? coverImageUrl : ''}
-                onChange={(event) => handleCustomUrl(event.target.value)}
+                onChange={handleUploadChange}
+                disabled={isUploading}
               />
+              <p className="text-xs text-slate-400">
+                JPG, PNG, WEBP, GIF, or AVIF. Max {maxUploadMegabytes}MB.
+              </p>
+              {isUploading ? (
+                <p className="text-sm text-slate-200">Uploading…</p>
+              ) : null}
+              {uploadError ? (
+                <p className="text-sm text-rose-300">{uploadError}</p>
+              ) : null}
             </div>
           </div>
         </FieldContent>
@@ -473,8 +588,12 @@ export function NewGoalForm({
         <Button type="button" variant="ghost" onClick={() => router.back()}>
           Cancel
         </Button>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Saving...' : 'Save goal'}
+        <Button type="submit" disabled={pending || isUploading}>
+          {pending
+            ? 'Saving...'
+            : isUploading
+              ? 'Uploading image...'
+              : 'Save goal'}
         </Button>
       </div>
     </Form>

@@ -20,7 +20,7 @@ export default async function NewGoalPage() {
         <div className="relative mx-auto w-full max-w-4xl px-6 py-12">
           <PageHeader
             title="Create a savings goal"
-            description="Set up a new bucket and attach a target, champions, and a cover image. You can wire in Unsplash search once we add the picker."
+            description="Set up a new bucket and attach a target, champions, and a cover image from Unsplash or your own upload."
           >
             <div className="flex gap-2 items-center">
               <Link

@@ -2,13 +2,13 @@
 
 ## Project Structure & Module Organization
 
-- `app/` is the Next.js App Router surface: `/` goals grid, `/goals/new` for creation, `/goals/[goalSlug]` for detail + ledger, and `app/api/unsplash/*` for search/download tracking.
+- `app/` is the Next.js App Router surface: `/` goals grid, `/goals/new` for creation, `/goals/[goalSlug]` for detail + ledger, `app/api/unsplash/*` for search/download tracking, and `app/api/storage/*` for upload targets + local/vercel upload handling.
 - `components/` holds app UI (goal cards, empty state, goal ledger table, new-goal form). `components/ui/` is shadcn/Base UI output.
 - `db/migrations/` holds SQL migrations (start with `001_init.sql` for goals tables).
 - `db/schema.sql` mirrors the app tables for quick reference.
 - `lib/db.ts` provides the Kysely connection; `lib/db-types.ts` defines typed tables/columns.
 - `scripts/` contains database tooling (`migrate.js`, `seed.js`).
-- `lib/` for utilities and data access: `lib/data/*`, `lib/ledger`, `lib/unsplash`.
+- `lib/` for utilities and data access: `lib/data/*`, `lib/ledger`, `lib/unsplash`, `lib/storage` (provider adapters + upload helpers).
 - Tests live in `lib/__tests__/` and `components/__tests__/`.
 
 ## Shadcn Components (Base UI)
@@ -50,4 +50,5 @@
 - Copy `.env.example` to `.env.local`.
 - Required: `DATABASE_URL`, `UNSPLASH_ACCESS_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 - Optional: `ALLOWED_EMAILS=you@example.com,partner@example.com` to restrict access.
+- Storage providers are configured via `STORAGE_PROVIDER` plus provider-specific env vars (see `.env.example`).
 - Vercel deploys from this repo; keep env vars synced across dev/preview/prod.

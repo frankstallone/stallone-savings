@@ -1,12 +1,12 @@
 # F4 Goal Tracker
 
-F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Base UI, Kysely, and a Neon Postgres database. It lets you organize deposits and withdrawals into goals, view per‑goal ledgers, and choose Unsplash cover imagery with attribution.
+F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Base UI, Kysely, and a Neon Postgres database. It lets you organize deposits and withdrawals into goals, view per‑goal ledgers, and pick cover imagery from Unsplash or your own uploads with attribution.
 
 ## Features
 
 - Goal cards with balances, champions, and cover images.
 - Per‑goal ledger with deposits/withdrawals and net movement.
-- Goal creation page with Unsplash search + attribution tracking.
+- Goal creation page with Unsplash search, uploads, and attribution tracking.
 - Toast confirmations for create/delete actions.
 - Vitest 4 test suite.
 
@@ -34,6 +34,8 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 ALLOWED_EMAILS=you@example.com,partner@example.com
 ```
 
+Storage configuration is optional unless you want user uploads; see the Storage section below.
+
 ## Database Setup
 
 1. Ensure the Better Auth tables are created in your database (run Better Auth's schema setup).
@@ -49,9 +51,61 @@ Optional seed data:
 npm run db:seed
 ```
 
+## Storage (User Uploads)
+
+The app ships with a provider-based storage layer so open-source users can choose their own object storage. The default provider is S3-compatible storage, and adapters exist for Vercel Blob and local development.
+
+Cover image uploads use `POST /api/storage/upload-target` to generate a provider-specific upload target, then the client uploads directly to the chosen storage. By default uploads accept JPG/PNG/WEBP/GIF/AVIF up to 10MB.
+
+### Default: S3-compatible (recommended)
+
+Works with AWS S3, Cloudflare R2, Backblaze B2 (S3 API), DigitalOcean Spaces, Wasabi, or MinIO.
+
+Required environment variables:
+
+```bash
+STORAGE_PROVIDER=s3
+S3_REGION=us-east-1
+S3_BUCKET=your_bucket_name
+S3_ACCESS_KEY_ID=your_access_key_id
+S3_SECRET_ACCESS_KEY=your_secret_access_key
+```
+
+Optional, but recommended:
+
+```bash
+S3_ENDPOINT=https://s3.us-east-1.amazonaws.com
+S3_PUBLIC_URL_BASE=https://your-cdn.example.com
+S3_FORCE_PATH_STYLE=false
+STORAGE_UPLOAD_URL_TTL_SECONDS=600
+```
+
+### Vercel Blob (optional)
+
+Use this if you want a Vercel-native setup.
+
+```bash
+STORAGE_PROVIDER=vercel
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+BLOB_PUBLIC_URL_BASE=https://your-store-id.public.blob.vercel-storage.com
+```
+
+Uploads are proxied through `/api/storage/vercel-upload` when using the Vercel adapter. This keeps the client upload flow consistent but is subject to Vercel's server upload limits; use S3-compatible storage if you need larger files.
+
+### Local development (optional)
+
+Uses local disk plus the built-in dev routes at `app/api/storage/local-*`. Intended for development; files are served publicly via `LOCAL_STORAGE_PUBLIC_URL_BASE`.
+
+```bash
+STORAGE_PROVIDER=local
+LOCAL_STORAGE_PATH=.local-uploads
+LOCAL_STORAGE_PUBLIC_URL_BASE=http://localhost:3000/api/storage/local-file
+LOCAL_STORAGE_UPLOAD_URL_BASE=http://localhost:3000/api/storage/local-upload
+```
+
 ## Data Access
 
-Database access uses Kysely with a typed schema in `lib/db-types.ts`. The `getDb()` helper in `lib/db.ts` returns the Kysely instance. Prefer the query builder for standard CRUD, and use `sql\`...\`.execute(db)` when you need raw SQL.
+Database access uses Kysely with a typed schema in `lib/db-types.ts`. The `getDb()` helper in `lib/db.ts` returns the Kysely instance. Prefer the query builder for standard CRUD, and use `sql\`...\`.execute(db)`when you need raw SQL. Storage adapters live in`lib/storage`and are selected by`STORAGE_PROVIDER`.
 
 ## Scripts
 
