@@ -44,6 +44,7 @@
 
 - Keep messages short and imperative (prefixes optional).
 - PRs should include summary + UI screenshots when visuals change.
+- Release Please runs on `main`. Prefer Conventional Commits (`feat:`, `fix:`, `feat!:` / `BREAKING CHANGE`) so version bumps and GitHub Releases are generated automatically.
 
 ## Configuration & Deployment Notes
 
