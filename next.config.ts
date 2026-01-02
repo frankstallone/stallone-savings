@@ -3,14 +3,17 @@ import withPWA from 'next-pwa'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-type RemotePattern = NonNullable<
-  NonNullable<NextConfig['images']>['remotePatterns']
->[number]
+type ImageRemotePattern = {
+  protocol?: 'http' | 'https'
+  hostname: string
+  port?: string
+  pathname?: string
+}
 
-const storageRemotePatterns: RemotePattern[] = []
+const storageRemotePatterns: ImageRemotePattern[] = []
 const seenPatterns = new Set<string>()
 
-const addRemotePattern = (pattern: RemotePattern | null) => {
+const addRemotePattern = (pattern: ImageRemotePattern | null) => {
   if (!pattern) return
   const key = `${pattern.protocol ?? ''}://${pattern.hostname}${pattern.port ?? ''}`
   if (seenPatterns.has(key)) return
@@ -18,14 +21,18 @@ const addRemotePattern = (pattern: RemotePattern | null) => {
   storageRemotePatterns.push(pattern)
 }
 
-const urlToPattern = (value?: string) => {
+const urlToPattern = (value?: string): ImageRemotePattern | null => {
   if (!value) return null
   try {
     const parsed = new URL(value)
+    const protocol = parsed.protocol.replace(':', '')
+    if (protocol !== 'http' && protocol !== 'https') {
+      return null
+    }
     return {
-      protocol: parsed.protocol.replace(':', ''),
+      protocol,
       hostname: parsed.hostname,
-    } satisfies RemotePattern
+    }
   } catch {
     return null
   }
