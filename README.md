@@ -1,6 +1,6 @@
 # F4 Goal Tracker
 
-[![CI](https://img.shields.io/github/actions/workflow/status/frankstallone/f4-goal-tracker/ci.yml?branch=main)](https://github.com/frankstallone/f4-goal-tracker/actions/workflows/ci.yml) [![Node](https://img.shields.io/github/package-json/node-version/frankstallone/f4-goal-tracker?logo=node.js&logoColor=white)](https://nodejs.org)
+[![CI](https://img.shields.io/github/actions/workflow/status/frankstallone/f4-goal-tracker/ci.yml?branch=main)](https://github.com/frankstallone/f4-goal-tracker/actions/workflows/ci.yml)
 
 F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Base UI, Kysely, and a Neon Postgres database. It lets you organize deposits and withdrawals into goals, view per‑goal ledgers, and pick cover imagery from Unsplash or your own uploads with attribution.
 
