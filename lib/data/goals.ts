@@ -1,13 +1,10 @@
 import { cache } from 'react'
-import { getDb, sql } from '@/lib/db'
-import { groupTotalsByGoal } from '@/lib/ledger'
-import type { Champion, GoalSummary, GoalTransaction } from '@/lib/types'
-import { sampleGoalSummaries, sampleTransactions } from '@/lib/data/sample'
 
-type GoalRow = Omit<GoalSummary, 'champions' | 'balanceCents'> & {
-  champions: Champion[] | null
-  balance_cents: number | null
-}
+import { getDb } from '@/lib/db'
+import { goalProjection, type GoalRow } from '@/lib/data/projections'
+import { groupTotalsByGoal } from '@/lib/ledger'
+import type { GoalSummary } from '@/lib/types'
+import { sampleGoalSummaries, sampleTransactions } from '@/lib/data/sample'
 
 function formatTimestamp(value: unknown) {
   if (!value) return null
@@ -44,44 +41,12 @@ export const getGoals = cache(async () => {
     return sampleGoalSummaries.filter((goal) => !goal.isArchived)
   }
 
-  const { rows } = await sql<GoalRow>`
-    SELECT
-      g.id,
-      g.slug,
-      g.name,
-      g.description,
-      g.cover_image_url AS "coverImageUrl",
-      g.cover_image_source AS "coverImageSource",
-      g.cover_image_attribution_name AS "coverImageAttributionName",
-      g.cover_image_attribution_url AS "coverImageAttributionUrl",
-      g.cover_image_id AS "coverImageId",
-      g.target_amount_cents AS "targetAmountCents",
-      g.is_archived AS "isArchived",
-      g.archived_at AS "archivedAt",
-      g.archived_by AS "archivedBy",
-      g.unarchived_at AS "unarchivedAt",
-      g.unarchived_by AS "unarchivedBy",
-      (
-        SELECT COALESCE(SUM(t.amount_cents), 0)::int
-        FROM goal_transactions t
-        WHERE t.goal_id = g.id
-      ) AS balance_cents,
-      (
-        SELECT COALESCE(
-          jsonb_agg(
-            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
-            ORDER BY u.name NULLS LAST, u.email
-          ) FILTER (WHERE u.id IS NOT NULL),
-          '[]'::jsonb
-        )
-        FROM goal_champions gc
-        JOIN "user" u ON u.id = gc.user_id
-        WHERE gc.goal_id = g.id
-      ) AS champions
-    FROM goals g
-    WHERE g.is_archived = false
-    ORDER BY g.created_at DESC
-  `.execute(db)
+  const rows = (await db
+    .selectFrom('goals as g')
+    .select((eb) => goalProjection(eb))
+    .where('g.is_archived', '=', false)
+    .orderBy('g.created_at', 'desc')
+    .execute()) as unknown as GoalRow[]
 
   return rows.map(mapGoalRow)
 })
@@ -97,45 +62,14 @@ export const getGoalBySlug = cache(async (slug: string) => {
     return sampleGoalSummaries.find((goal) => goal.slug === slug) ?? null
   }
 
-  const { rows } = await sql<GoalRow>`
-    SELECT
-      g.id,
-      g.slug,
-      g.name,
-      g.description,
-      g.cover_image_url AS "coverImageUrl",
-      g.cover_image_source AS "coverImageSource",
-      g.cover_image_attribution_name AS "coverImageAttributionName",
-      g.cover_image_attribution_url AS "coverImageAttributionUrl",
-      g.cover_image_id AS "coverImageId",
-      g.target_amount_cents AS "targetAmountCents",
-      g.is_archived AS "isArchived",
-      g.archived_at AS "archivedAt",
-      g.archived_by AS "archivedBy",
-      g.unarchived_at AS "unarchivedAt",
-      g.unarchived_by AS "unarchivedBy",
-      (
-        SELECT COALESCE(SUM(t.amount_cents), 0)::int
-        FROM goal_transactions t
-        WHERE t.goal_id = g.id
-      ) AS balance_cents,
-      (
-        SELECT COALESCE(
-          jsonb_agg(
-            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
-            ORDER BY u.name NULLS LAST, u.email
-          ) FILTER (WHERE u.id IS NOT NULL),
-          '[]'::jsonb
-        )
-        FROM goal_champions gc
-        JOIN "user" u ON u.id = gc.user_id
-        WHERE gc.goal_id = g.id
-      ) AS champions
-    FROM goals g
-    WHERE g.slug = ${slug}
-    ORDER BY g.is_archived ASC, g.created_at DESC
-    LIMIT 1
-  `.execute(db)
+  const rows = (await db
+    .selectFrom('goals as g')
+    .select((eb) => goalProjection(eb))
+    .where('g.slug', '=', slug)
+    .orderBy('g.is_archived', 'asc')
+    .orderBy('g.created_at', 'desc')
+    .limit(1)
+    .execute()) as unknown as GoalRow[]
 
   const row = rows[0]
   if (!row) return null
@@ -149,44 +83,13 @@ export const getArchivedGoals = cache(async () => {
     return sampleGoalSummaries.filter((goal) => goal.isArchived)
   }
 
-  const { rows } = await sql<GoalRow>`
-    SELECT
-      g.id,
-      g.slug,
-      g.name,
-      g.description,
-      g.cover_image_url AS "coverImageUrl",
-      g.cover_image_source AS "coverImageSource",
-      g.cover_image_attribution_name AS "coverImageAttributionName",
-      g.cover_image_attribution_url AS "coverImageAttributionUrl",
-      g.cover_image_id AS "coverImageId",
-      g.target_amount_cents AS "targetAmountCents",
-      g.is_archived AS "isArchived",
-      g.archived_at AS "archivedAt",
-      g.archived_by AS "archivedBy",
-      g.unarchived_at AS "unarchivedAt",
-      g.unarchived_by AS "unarchivedBy",
-      (
-        SELECT COALESCE(SUM(t.amount_cents), 0)::int
-        FROM goal_transactions t
-        WHERE t.goal_id = g.id
-      ) AS balance_cents,
-      (
-        SELECT COALESCE(
-          jsonb_agg(
-            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
-            ORDER BY u.name NULLS LAST, u.email
-          ) FILTER (WHERE u.id IS NOT NULL),
-          '[]'::jsonb
-        )
-        FROM goal_champions gc
-        JOIN "user" u ON u.id = gc.user_id
-        WHERE gc.goal_id = g.id
-      ) AS champions
-    FROM goals g
-    WHERE g.is_archived = true
-    ORDER BY g.archived_at DESC NULLS LAST, g.created_at DESC
-  `.execute(db)
+  const rows = (await db
+    .selectFrom('goals as g')
+    .select((eb) => goalProjection(eb))
+    .where('g.is_archived', '=', true)
+    .orderBy('g.archived_at', 'desc')
+    .orderBy('g.created_at', 'desc')
+    .execute()) as unknown as GoalRow[]
 
   return rows.map(mapGoalRow)
 })
@@ -201,44 +104,12 @@ export const getArchivedGoalById = cache(async (goalId: string) => {
     )
   }
 
-  const { rows } = await sql<GoalRow>`
-    SELECT
-      g.id,
-      g.slug,
-      g.name,
-      g.description,
-      g.cover_image_url AS "coverImageUrl",
-      g.cover_image_source AS "coverImageSource",
-      g.cover_image_attribution_name AS "coverImageAttributionName",
-      g.cover_image_attribution_url AS "coverImageAttributionUrl",
-      g.cover_image_id AS "coverImageId",
-      g.target_amount_cents AS "targetAmountCents",
-      g.is_archived AS "isArchived",
-      g.archived_at AS "archivedAt",
-      g.archived_by AS "archivedBy",
-      g.unarchived_at AS "unarchivedAt",
-      g.unarchived_by AS "unarchivedBy",
-      (
-        SELECT COALESCE(SUM(t.amount_cents), 0)::int
-        FROM goal_transactions t
-        WHERE t.goal_id = g.id
-      ) AS balance_cents,
-      (
-        SELECT COALESCE(
-          jsonb_agg(
-            jsonb_build_object('id', u.id, 'name', u.name, 'email', u.email)
-            ORDER BY u.name NULLS LAST, u.email
-          ) FILTER (WHERE u.id IS NOT NULL),
-          '[]'::jsonb
-        )
-        FROM goal_champions gc
-        JOIN "user" u ON u.id = gc.user_id
-        WHERE gc.goal_id = g.id
-      ) AS champions
-    FROM goals g
-    WHERE g.id = ${goalId}
-    LIMIT 1
-  `.execute(db)
+  const rows = (await db
+    .selectFrom('goals as g')
+    .select((eb) => goalProjection(eb))
+    .where('g.id', '=', goalId)
+    .limit(1)
+    .execute()) as unknown as GoalRow[]
 
   const row = rows[0]
   if (!row) return null
@@ -253,18 +124,20 @@ export const getGoalTransactions = cache(async (goalId: string) => {
     )
   }
 
-  const { rows } = await sql<GoalTransaction>`
-    SELECT
-      id,
-      goal_id AS "goalId",
-      description,
-      amount_cents AS "amountCents",
-      transacted_on AS "transactedOn",
-      created_by AS "createdBy"
-    FROM goal_transactions
-    WHERE goal_id = ${goalId}
-    ORDER BY transacted_on DESC, created_at DESC
-  `.execute(db)
+  const rows = await db
+    .selectFrom('goal_transactions')
+    .select([
+      'id',
+      'goal_id as goalId',
+      'description',
+      'amount_cents as amountCents',
+      'transacted_on as transactedOn',
+      'created_by as createdBy',
+    ])
+    .where('goal_id', '=', goalId)
+    .orderBy('transacted_on', 'desc')
+    .orderBy('created_at', 'desc')
+    .execute()
 
   return rows.map((row) => ({
     ...row,
@@ -287,11 +160,17 @@ export const getGoalTotals = cache(async () => {
     )
   }
 
-  const { rows } = await sql<{ goalId: string; balance: number }>`
-    SELECT goal_id AS "goalId", COALESCE(SUM(amount_cents), 0)::int AS balance
-    FROM goal_transactions
-    GROUP BY goal_id
-  `.execute(db)
+  const rows = await db
+    .selectFrom('goal_transactions')
+    .select((eb) => [
+      'goal_id as goalId',
+      eb.fn
+        .coalesce(eb.fn.sum('amount_cents'), eb.val(0))
+        .$castTo<number>()
+        .as('balance'),
+    ])
+    .groupBy('goal_id')
+    .execute()
 
   return rows.reduce<Record<string, number>>((totals, row) => {
     totals[row.goalId] = Number(row.balance)
