@@ -19,15 +19,25 @@ export default async function NewTransactionPage({
   params,
 }: NewTransactionPageProps) {
   const { goalSlug } = await params
-  const session = await requireServerSession()
-  const goal = await getGoalBySlug(goalSlug)
+  const sessionPromise = requireServerSession()
+  const goalPromise = getGoalBySlug(goalSlug)
+  const userOptionsPromise = getAllowedUsers()
+  const [session, goal, userOptions] = await Promise.all([
+    sessionPromise,
+    goalPromise,
+    userOptionsPromise,
+  ])
   if (!goal) {
     notFound()
   }
   if (goal.isArchived) {
     redirect(`/goals/${goal.slug}`)
   }
-  const userOptions = await getAllowedUsers()
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -49,7 +59,7 @@ export default async function NewTransactionPage({
               >
                 Back
               </Link>
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

@@ -37,8 +37,9 @@ interface GoalDetailPageProps {
 
 export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { goalSlug } = await params
-  const session = await requireServerSession()
-  const goal = await getGoalBySlug(goalSlug)
+  const sessionPromise = requireServerSession()
+  const goalPromise = getGoalBySlug(goalSlug)
+  const [session, goal] = await Promise.all([sessionPromise, goalPromise])
   if (!goal) {
     notFound()
   }
@@ -50,6 +51,11 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
     : goal.balanceCents
   const { deposits, withdrawals } = splitDepositsWithdrawals(transactions)
   const isArchived = goal.isArchived
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -153,7 +159,7 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
                   </DropdownMenu>
                 </ButtonGroup>
               )}
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

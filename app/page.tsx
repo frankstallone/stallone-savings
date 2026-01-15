@@ -14,14 +14,19 @@ import {
 import { getGoals } from '@/lib/data/goals'
 import { formatCurrencyFromCents } from '@/lib/format'
 import { requireServerSession } from '@/lib/auth-session'
-import type { GoalSummary } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Ellipsis, PlusIcon } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function HomePage() {
-  const session = await requireServerSession()
-  const goals = (await getGoals()) as GoalSummary[]
+  const sessionPromise = requireServerSession()
+  const goalsPromise = getGoals()
+  const [session, goals] = await Promise.all([sessionPromise, goalsPromise])
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
   const totalBalance = goals.reduce(
     (sum: number, goal: { balanceCents: number }) => sum + goal.balanceCents,
     0,
@@ -79,7 +84,7 @@ export default async function HomePage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </ButtonGroup>
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

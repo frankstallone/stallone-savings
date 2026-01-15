@@ -21,15 +21,20 @@ export default async function EditTransactionPage({
   params,
 }: EditTransactionPageProps) {
   const { goalSlug, transactionId } = await params
-  const session = await requireServerSession()
-  const goal = await getGoalBySlug(goalSlug)
+  const sessionPromise = requireServerSession()
+  const goalPromise = getGoalBySlug(goalSlug)
+  const userOptionsPromise = getAllowedUsers()
+  const [session, goal, userOptions] = await Promise.all([
+    sessionPromise,
+    goalPromise,
+    userOptionsPromise,
+  ])
   if (!goal) {
     notFound()
   }
   if (goal.isArchived) {
     redirect(`/goals/${goal.slug}`)
   }
-  const userOptions = await getAllowedUsers()
 
   const transaction = await getGoalTransactionById(goal.id, transactionId)
   if (!transaction) {
@@ -38,6 +43,11 @@ export default async function EditTransactionPage({
 
   const direction = transaction.amountCents < 0 ? 'withdrawal' : 'deposit'
   const amountValue = (Math.abs(transaction.amountCents) / 100).toFixed(2)
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -64,7 +74,7 @@ export default async function EditTransactionPage({
                 transactionId={transaction.id}
                 description={transaction.description}
               />
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

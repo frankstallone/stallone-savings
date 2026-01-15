@@ -9,9 +9,18 @@ import { getAllowedUsers } from '@/lib/users'
 import { cn } from '@/lib/utils'
 
 export default async function NewGoalPage() {
-  const session = await requireServerSession()
-  const championOptions = await getAllowedUsers()
+  const sessionPromise = requireServerSession()
+  const championOptionsPromise = getAllowedUsers()
+  const [session, championOptions] = await Promise.all([
+    sessionPromise,
+    championOptionsPromise,
+  ])
   const defaultChampionIds = session?.user?.id ? [session.user.id] : []
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="relative overflow-hidden">
@@ -32,7 +41,7 @@ export default async function NewGoalPage() {
               >
                 Back
               </Link>
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

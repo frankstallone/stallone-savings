@@ -10,8 +10,14 @@ import { getArchivedGoals } from '@/lib/data/goals'
 import { cn } from '@/lib/utils'
 
 export default async function ArchivedGoalsPage() {
-  const session = await requireServerSession()
-  const goals = await getArchivedGoals()
+  const sessionPromise = requireServerSession()
+  const goalsPromise = getArchivedGoals()
+  const [session, goals] = await Promise.all([sessionPromise, goalsPromise])
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -36,7 +42,7 @@ export default async function ArchivedGoalsPage() {
               >
                 Back
               </Link>
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 

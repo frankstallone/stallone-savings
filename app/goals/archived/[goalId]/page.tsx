@@ -36,8 +36,9 @@ export default async function ArchivedGoalDetailPage({
   params,
 }: ArchivedGoalDetailPageProps) {
   const { goalId } = await params
-  const session = await requireServerSession()
-  const goal = await getArchivedGoalById(goalId)
+  const sessionPromise = requireServerSession()
+  const goalPromise = getArchivedGoalById(goalId)
+  const [session, goal] = await Promise.all([sessionPromise, goalPromise])
   if (!goal) {
     notFound()
   }
@@ -51,6 +52,11 @@ export default async function ArchivedGoalDetailPage({
     ? balanceFromTransactions
     : goal.balanceCents
   const { deposits, withdrawals } = splitDepositsWithdrawals(transactions)
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -104,7 +110,7 @@ export default async function ArchivedGoalDetailPage({
                 </DropdownMenuContent>
               </DropdownMenu>
             </ButtonGroup>
-            <UserMenu user={session.user} />
+            <UserMenu user={user} />
           </PageHeader>
 
           <section className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">

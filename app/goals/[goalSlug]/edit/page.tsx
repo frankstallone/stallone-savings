@@ -16,16 +16,26 @@ interface EditGoalPageProps {
 
 export default async function EditGoalPage({ params }: EditGoalPageProps) {
   const { goalSlug } = await params
-  const session = await requireServerSession()
-  const goal = await getGoalBySlug(goalSlug)
+  const sessionPromise = requireServerSession()
+  const goalPromise = getGoalBySlug(goalSlug)
+  const championOptionsPromise = getAllowedUsers()
+  const [session, goal, championOptions] = await Promise.all([
+    sessionPromise,
+    goalPromise,
+    championOptionsPromise,
+  ])
   if (!goal) {
     notFound()
   }
   if (goal.isArchived) {
     redirect(`/goals/${goal.slug}`)
   }
-  const championOptions = await getAllowedUsers()
   const defaultChampionIds = goal.champions.map((champion) => champion.id)
+  const user = {
+    name: session.user?.name ?? null,
+    email: session.user?.email ?? null,
+    image: session.user?.image ?? null,
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -47,7 +57,7 @@ export default async function EditGoalPage({ params }: EditGoalPageProps) {
               >
                 Back
               </Link>
-              <UserMenu user={session.user} />
+              <UserMenu user={user} />
             </div>
           </PageHeader>
 
