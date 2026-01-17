@@ -37,10 +37,11 @@ ALLOWED_EMAILS=you@example.com,partner@example.com
 ```
 
 Storage configuration is optional unless you want user uploads; see the Storage section below.
+`BETTER_AUTH_SECRET` must be at least 32 characters. In production, set `BETTER_AUTH_URL` to your public app URL so trusted origins and OAuth redirects match your deployment.
 
 ## Database Setup
 
-1. Ensure the Better Auth tables are created in your database (run Better Auth's schema setup).
+1. Ensure the Better Auth tables are created in your database (run Better Auth's schema setup; see https://better-auth.com/docs).
 2. Apply app migrations:
 
 ```bash
