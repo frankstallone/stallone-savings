@@ -49,7 +49,7 @@
 ## Configuration & Deployment Notes
 
 - Copy `.env.example` to `.env.local`.
-- Required: `DATABASE_URL`, `UNSPLASH_ACCESS_KEY`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+- Required: `DATABASE_URL`, `UNSPLASH_ACCESS_KEY`, `BETTER_AUTH_SECRET` (32+ chars), `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 - Optional: `ALLOWED_EMAILS=you@example.com,partner@example.com` to restrict access.
 - Storage providers are configured via `STORAGE_PROVIDER` plus provider-specific env vars (see `.env.example`).
 - Vercel deploys from this repo; keep env vars synced across dev/preview/prod.
