@@ -12,6 +12,51 @@ F4 Goal Tracker is a goal‑based savings tracker built with Next.js, shadcn/Bas
 - Toast confirmations for create/delete actions.
 - Vitest 4 test suite.
 
+## How the App Works
+
+- Sign in with Google (Better Auth). Optional email allowlist can restrict access.
+- Create a goal with a name, optional description, target amount, champions, and a cover image.
+- Add transactions to the goal. Deposits increase the balance; withdrawals decrease it.
+- The goal detail page shows totals, net movement, and a ledger of all transactions.
+- Archive a goal to make it read-only. Archived goals move to the Archived Goals list.
+- Unarchive to restore a goal to the active list. Delete permanently removes a goal and its ledger.
+
+## Quick Start (Try It)
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy the environment file and fill in required values:
+
+```bash
+cp .env.example .env.local
+```
+
+Required: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `UNSPLASH_ACCESS_KEY`.
+
+3. Apply Better Auth’s schema (see Database Setup), then run app migrations:
+
+```bash
+npm run db:migrate
+```
+
+4. (Optional) Load sample goals:
+
+```bash
+npm run db:seed
+```
+
+5. Start the dev server and sign in:
+
+```bash
+npm run dev
+```
+
+Then visit `http://localhost:3000` and sign in with a Google account (must be on the allowlist if `ALLOWED_EMAILS` is set).
+
 ## Local Development
 
 ```bash
